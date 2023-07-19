@@ -1,0 +1,77 @@
+
+
+DROP table subscribes;
+
+create table subscribes(
+                           source_id int,
+                           target_id int,
+                           PRIMARY KEY(source_id, target_id),
+                           FOREIGN KEY(source_id) REFERENCES  user_profile (id) ON DELETE CASCADE,
+                           FOREIGN KEY(target_id) REFERENCES  user_profile (id) ON DELETE CASCADE
+);
+create table user_profile(
+                           id SERIAL,
+                           name varchar(30),
+                           mail varchar(30),
+                           password varchar(30),
+                           PRIMARY KEY(id)
+);
+create table post(
+                          id SERIAL,
+                          header varchar(30),
+                          text text,
+                          image_url varchar(30),
+                          PRIMARY KEY(id)
+);
+create table user_post(
+  user_id int,
+  post_id int,
+  date date,
+  FOREIGN KEY(user_id) REFERENCES  user_profile(id) ON DELETE CASCADE,
+  FOREIGN KEY(post_id) REFERENCES  post (id) ON DELETE CASCADE,
+  PRIMARY KEY(user_id, post_id)
+);
+create table conversations(
+                    id SERIAL,
+                     uid1 int,
+                     uid2 int,
+                     primary key (id)
+);
+
+create table messages(
+                          id SERIAL,
+                          conversation_id int,
+                          text text,
+                          FOREIGN KEY(conversation_id) REFERENCES  conversations(id) ON DELETE CASCADE,
+                          PRIMARY KEY(id)
+);
+
+INSERT INTO subscribes (source_id, target_id)
+SELECT
+    (random() * 100 + 1)::int,
+    (random() * 100 + 1)::int
+FROM
+    generate_series(1, 200);
+
+/*поиск своих подписчиков
+пусть я id=6
+*/
+SELECT source_id FROM subscribes
+WHERE target_id = 9;
+
+/*поиск подписок
+пусть я id=6
+*/
+SELECT target_id FROM subscribes
+WHERE source_id = 6;
+
+/*поиск друзей
+пусть я id=6
+*/
+
+SELECT source_id FROM subscribes outer_subscribes
+WHERE target_id = 2 AND EXISTS(SELECT * FROM subscribes WHERE source_id=outer_subscribes.target_id
+                                                          AND target_id = outer_subscribes.source_id);
+
+SELECT * FROM subscribes
+WHERE target_id = 2;
