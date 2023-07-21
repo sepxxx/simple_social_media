@@ -16,6 +16,13 @@ public class Post {
     @Column
     private String image_url;
 
+
+    @ManyToOne
+    @JoinTable(name = "user_post",
+            joinColumns = @JoinColumn(name="post_id"),
+            inverseJoinColumns = @JoinColumn(name="user_id"))
+    private UserProfile userProfile;
+
     public Post() {
     }
 

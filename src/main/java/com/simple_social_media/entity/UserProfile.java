@@ -2,6 +2,11 @@ package com.simple_social_media.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.simple_social_media.entity.Post;
+
 @Entity
 @Table(name="user_profile")
 public class UserProfile {
@@ -16,6 +21,19 @@ public class UserProfile {
     @Column
     private String password;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "user_post",
+            joinColumns = @JoinColumn(name="user_id"),
+            inverseJoinColumns = @JoinColumn(name="post_id"))
+    private List<Post> posts;
+
+    public void addPostToUser(Post post) {
+        if(posts==null) {
+            posts = new ArrayList<>();
+        } else {
+            posts.add(post);
+        }
+    }
     public UserProfile(String name, String mail, String password) {
         this.name = name;
         this.mail = mail;
