@@ -1,5 +1,6 @@
 package com.simple_social_media.services;
 
+import com.simple_social_media.entity.Post;
 import com.simple_social_media.entity.UserProfile;
 import org.springframework.stereotype.Service;
 
@@ -14,5 +15,7 @@ public interface UserProfileService {
         UserProfile getUserProfile(int id);
 
         void deleteUserProfile(int id);
+
+        List<Post> getAllUserProfilePosts(int id);
 
 }

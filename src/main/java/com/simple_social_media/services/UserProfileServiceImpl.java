@@ -1,6 +1,7 @@
 package com.simple_social_media.services;
 
 import com.simple_social_media.dao.UserProfileRepository;
+import com.simple_social_media.entity.Post;
 import com.simple_social_media.entity.UserProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,4 +38,11 @@ public class UserProfileServiceImpl implements UserProfileService{
         userProfileRepository.deleteById(id);
     }
 
+
+    @Override
+    public List<Post> getAllUserProfilePosts(int id) {
+        UserProfile userProfile = getUserProfile(id);
+        if(userProfile==null) return null;
+        return userProfile.getPosts();
+    }
 }

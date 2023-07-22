@@ -27,6 +27,11 @@ public class UserProfile {
             inverseJoinColumns = @JoinColumn(name="post_id"))
     private List<Post> posts;
 
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
     public void addPostToUser(Post post) {
         if(posts==null) {
             posts = new ArrayList<>();
