@@ -52,7 +52,7 @@ public class MainController {
 
     /////////////////////////////////////POSTs
     @GetMapping("/posts/{id}")
-    public Post getPost(@PathVariable int id) {
+    public Post getPost(@PathVariable Long id) {
         return postService.getPost(id);
     }
     @GetMapping("/userProfiles/{id}/posts")
@@ -74,7 +74,7 @@ public class MainController {
     }
 
     @DeleteMapping("/posts/{id}")
-    public String deletePost(@PathVariable int id) {
+    public String deletePost(@PathVariable Long id) {
         //тут нужно скорее всего проверить кто отправляет запрос
         postService.deletePost(id);
         return "deleted user post with id: "+id+" from db";
