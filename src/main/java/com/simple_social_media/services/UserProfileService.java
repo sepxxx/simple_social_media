@@ -1,24 +1,23 @@
 package com.simple_social_media.services;
 
 import com.simple_social_media.entity.Post;
-import com.simple_social_media.entity.UserProfile;
-import org.springframework.stereotype.Service;
+import com.simple_social_media.entity.User;
 
 import java.util.List;
 
 
 public interface UserProfileService {
 
-        List<UserProfile> getAllUserProfiles();
-        void saveUserProfile(UserProfile UserProfile);
+        List<User> getAllUserProfiles();
+        void saveUserProfile(User User);
 
-        UserProfile getUserProfile(int id);
+        User getUserProfile(int id);
 
         void deleteUserProfile(int id);
 
         List<Post> getAllUserProfilePosts(int id);
 
-        List<UserProfile> getAllUserProfileSubscriptions(int id);
-        List<UserProfile> getAllUserProfileSubscribes(int id);
+        List<User> getAllUserProfileSubscriptions(int id);
+        List<User> getAllUserProfileSubscribes(int id);
 
 }

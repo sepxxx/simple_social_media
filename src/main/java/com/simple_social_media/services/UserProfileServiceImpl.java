@@ -2,9 +2,8 @@ package com.simple_social_media.services;
 
 import com.simple_social_media.dao.UserProfileRepository;
 import com.simple_social_media.entity.Post;
-import com.simple_social_media.entity.UserProfile;
+import com.simple_social_media.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,22 +15,22 @@ public class UserProfileServiceImpl implements UserProfileService{
     private final UserProfileRepository userProfileRepository;
 
     @Override
-    public List<UserProfile> getAllUserProfiles() {
+    public List<User> getAllUserProfiles() {
         return userProfileRepository.findAll();
     }
 
     @Override
-    public void saveUserProfile(UserProfile userProfile) {
-        userProfileRepository.save(userProfile);
+    public void saveUserProfile(User user) {
+        userProfileRepository.save(user);
     }
 
     @Override
-    public UserProfile getUserProfile(int id) {
-        Optional<UserProfile> optional = userProfileRepository.findById(id);
-        UserProfile userProfile = null;
+    public User getUserProfile(int id) {
+        Optional<User> optional = userProfileRepository.findById(id);
+        User user = null;
         if(optional.isPresent())
-            userProfile=optional.get();
-        return userProfile;
+            user =optional.get();
+        return user;
     }
 
     @Override
@@ -43,25 +42,25 @@ public class UserProfileServiceImpl implements UserProfileService{
     @Override
     public List<Post> getAllUserProfilePosts(int id) {
         //используем уже готовый метод работающий с репозиторием
-        UserProfile userProfile = getUserProfile(id);
-        if(userProfile==null) return null;
-        return userProfile.getPosts();
+        User user = getUserProfile(id);
+        if(user ==null) return null;
+        return user.getPosts();
     }
 
 
     @Override
-    public List<UserProfile> getAllUserProfileSubscriptions(int id) {
+    public List<User> getAllUserProfileSubscriptions(int id) {
         //используем уже готовый метод работающий с репозиторием
-        UserProfile userProfile = getUserProfile(id);
-        if(userProfile==null) return null;
-        return userProfile.getSubscriptions();
+        User user = getUserProfile(id);
+        if(user ==null) return null;
+        return user.getSubscriptions();
     }
 
     @Override
-    public List<UserProfile> getAllUserProfileSubscribes(int id) {
+    public List<User> getAllUserProfileSubscribes(int id) {
         //используем уже готовый метод работающий с репозиторием
-        UserProfile userProfile = getUserProfile(id);
-        if(userProfile==null) return null;
-        return userProfile.getSubscribers();
+        User user = getUserProfile(id);
+        if(user ==null) return null;
+        return user.getSubscribers();
     }
 }

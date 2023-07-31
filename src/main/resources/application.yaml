@@ -1,0 +1,8 @@
+spring:
+  datasource:
+      url: jdbc:postgresql://localhost:5432/jeraldin
+      username: postgres
+      password: springcourse
+jwt:
+  secret: vVFdS0WHjfpY56sTwGrKxH+9hs2OihqLyCDj+VHgnfORDPcI+85BBtuBB56tPifs
+  lifetime: 30m

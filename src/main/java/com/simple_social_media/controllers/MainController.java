@@ -1,44 +1,43 @@
 package com.simple_social_media.controllers;
 
 import com.simple_social_media.entity.Post;
-import com.simple_social_media.entity.UserProfile;
+import com.simple_social_media.entity.User;
 import com.simple_social_media.services.PostService;
 import com.simple_social_media.services.UserProfileService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/")
-public class MyRestController {
-    @Autowired
-    UserProfileService userProfileService;
+@RequiredArgsConstructor
+public class MainController {
+    private final UserProfileService userProfileService;
 
-    @Autowired
-    PostService postService;
+    private final PostService postService;
 
     //USERPROFILE
     @GetMapping("/userProfiles")
-    public List<UserProfile> showAllUserProfiles() {
+    public List<User> showAllUserProfiles() {
         return userProfileService.getAllUserProfiles();
     }
 
     @GetMapping("/userProfiles/{id}")
-    public UserProfile getUserProfile(@PathVariable int id) {
+    public User getUserProfile(@PathVariable int id) {
         return userProfileService.getUserProfile(id);
     }
 
     @PostMapping("/userProfiles")
-    public UserProfile addUserProfile(@RequestBody UserProfile userProfile) {
-        userProfileService.saveUserProfile(userProfile);
-        return userProfile;
+    public User addUserProfile(@RequestBody User user) {
+        userProfileService.saveUserProfile(user);
+        return user;
     }
 
     @PutMapping("/userProfiles")
-    public UserProfile updateUserProfile(@RequestBody UserProfile userProfile) {
-        userProfileService.saveUserProfile(userProfile);
-        return userProfile;
+    public User updateUserProfile(@RequestBody User user) {
+        userProfileService.saveUserProfile(user);
+        return user;
     }
 
     @DeleteMapping("/userProfiles/{id}")
@@ -66,9 +65,9 @@ public class MyRestController {
         //добавляем в его список постов пост
         //сохраняем пост в табличку
         //если нет, то ничего не делаем
-        UserProfile userProfile = userProfileService.getUserProfile(id);
-        if(userProfile==null) return null;
-        userProfile.addPostToUser(post);
+        User user = userProfileService.getUserProfile(id);
+        if(user ==null) return null;
+        user.addPostToUser(post);
         //нужно скорее всего будет обновить юзера в табличке чтобы запись была в jointable
         postService.savePost(post);
         return post;
@@ -84,11 +83,11 @@ public class MyRestController {
 
     /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
     @GetMapping("/userProfiles/{id}/subscriptions")
-    public List<UserProfile> getAllUserProfileSubscriptions(@PathVariable int id) {
+    public List<User> getAllUserProfileSubscriptions(@PathVariable int id) {
         return userProfileService.getAllUserProfileSubscriptions(id);
     }
     @GetMapping("/userProfiles/{id}/subscribers")
-    public List<UserProfile> getAllUserProfileSubscribers(@PathVariable int id) {
+    public List<User> getAllUserProfileSubscribers(@PathVariable int id) {
         return userProfileService.getAllUserProfileSubscribes(id);
     }
     /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS

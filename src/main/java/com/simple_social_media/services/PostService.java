@@ -1,8 +1,6 @@
 package com.simple_social_media.services;
 
 import com.simple_social_media.entity.Post;
-import com.simple_social_media.entity.UserProfile;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

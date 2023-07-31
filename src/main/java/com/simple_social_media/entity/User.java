@@ -9,7 +9,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name="user_profile")
-public class UserProfile {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -27,47 +27,40 @@ public class UserProfile {
             inverseJoinColumns = @JoinColumn(name="post_id"))
     private List<Post> posts;
 
-
-
     @ManyToMany
     @JoinTable(name="subscribes",
             joinColumns=@JoinColumn(name="source_id"),
             inverseJoinColumns=@JoinColumn(name="target_id")
     )
-    private List<UserProfile> subscriptions;
+    private List<User> subscriptions;
 
     @ManyToMany
     @JoinTable(name="subscribes",
             joinColumns=@JoinColumn(name="target_id"),
             inverseJoinColumns=@JoinColumn(name="source_id")
     )
-    private List<UserProfile> subscribers;
-
-    public List<Post> getPosts() {
-        return posts;
-    }
-
-    public List<UserProfile> getSubscriptions() {
-        return subscriptions;
-    }
+    private List<User> subscribers;
 
 
-    public List<UserProfile> getSubscribers() {
-        return subscribers;
-    }
-    public void addSubscriberToUser(UserProfile userProfile) {
+    @ManyToMany
+    @JoinTable(name = "users_roles",
+    joinColumns = @JoinColumn(name="user_id"),
+    inverseJoinColumns = @JoinColumn(name="role_id"))
+    private List<Role> roles;
+
+    public void addSubscriberToUser(User user) {
         if(subscribers==null) {
             subscribers = new ArrayList<>();
         } else {
-            subscribers.add(userProfile);
+            subscribers.add(user);
         }
     }
 
-    public void addSubscriptionToUser(UserProfile userProfile) {
+    public void addSubscriptionToUser(User user) {
         if(subscriptions==null) {
             subscriptions = new ArrayList<>();
         }else {
-            subscriptions.add(userProfile);
+            subscriptions.add(user);
         }
      }
 
@@ -79,13 +72,13 @@ public class UserProfile {
             posts.add(post);
         }
     }
-    public UserProfile(String name, String mail, String password) {
+    public User(String name, String mail, String password) {
         this.name = name;
         this.mail = mail;
         this.password = password;
     }
 
-    public UserProfile() {
+    public User() {
 
     }
 }

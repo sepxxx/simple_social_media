@@ -23,7 +23,7 @@ public class Post {
     @JoinTable(name = "user_post",
             joinColumns = @JoinColumn(name="post_id"),
             inverseJoinColumns = @JoinColumn(name="user_id"))
-    private UserProfile userProfile;
+    private User user;
 
     public Post() {
     }
