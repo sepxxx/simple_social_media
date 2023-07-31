@@ -1,77 +1,71 @@
-
-
-DROP table subscribes;
+drop table subscribes;
+drop table user_post;
+drop table messages;
+drop table conversations;
+drop table post;
+drop table users;
+drop table users_roles;
+drop table roles;
+create table users(
+                             id BIGSERIAL,
+                             name varchar(30) not null unique,
+                             mail varchar(30) unique,
+                             password varchar(30) not null,
+                             PRIMARY KEY(id)
+);
 
 create table subscribes(
-                           source_id int,
-                           target_id int,
+                           source_id bigint not null,
+                           target_id bigint not null,
                            PRIMARY KEY(source_id, target_id),
-                           FOREIGN KEY(source_id) REFERENCES  user_profile (id) ON DELETE CASCADE,
-                           FOREIGN KEY(target_id) REFERENCES  user_profile (id) ON DELETE CASCADE
+                           FOREIGN KEY(source_id) REFERENCES  users (id) ON DELETE CASCADE,
+                           FOREIGN KEY(target_id) REFERENCES  users (id) ON DELETE CASCADE
 );
-create table user_profile(
-                           id SERIAL,
-                           name varchar(30),
-                           mail varchar(30),
-                           password varchar(30),
-                           PRIMARY KEY(id)
-);
+
 create table post(
-                          id SERIAL,
-                          header varchar(30),
-                          text text,
-                          image_url varchar(30),
-                          PRIMARY KEY(id)
+                     id BIGSERIAL,
+                     header varchar(30),
+                     text text,
+                     image_url varchar(30),
+                     date date,
+                     PRIMARY KEY(id)
 );
 create table user_post(
-  user_id int,
-  post_id int,
-  date date,
-  FOREIGN KEY(user_id) REFERENCES  user_profile(id) ON DELETE CASCADE,
-  FOREIGN KEY(post_id) REFERENCES  post (id) ON DELETE CASCADE,
-  PRIMARY KEY(user_id, post_id)
+                          user_id bigint not null,
+                          post_id bigint not null,
+                          FOREIGN KEY(user_id) REFERENCES  users(id) ON DELETE CASCADE,
+                          FOREIGN KEY(post_id) REFERENCES  post (id) ON DELETE CASCADE,
+                          PRIMARY KEY(user_id, post_id)
 );
 create table conversations(
-                    id SERIAL,
-                     uid1 int,
-                     uid2 int,
-                     primary key (id)
+                              id BIGSERIAL,
+                              uid1 bigint not null,
+                              uid2 bigint not null,
+                              primary key (id)
 );
 
 create table messages(
-                          id SERIAL,
-                          conversation_id int,
-                          text text,
-                          FOREIGN KEY(conversation_id) REFERENCES  conversations(id) ON DELETE CASCADE,
-                          PRIMARY KEY(id)
+                         id BIGSERIAL,
+                         conversation_id bigint not null,
+                         text text,
+                         FOREIGN KEY(conversation_id) REFERENCES  conversations(id) ON DELETE CASCADE,
+                         PRIMARY KEY(id)
 );
 
-INSERT INTO subscribes (source_id, target_id)
-SELECT
-    (random() * 100 + 1)::int,
-    (random() * 100 + 1)::int
-FROM
-    generate_series(1, 200);
 
-/*поиск своих подписчиков
-пусть я id=6
-*/
-SELECT source_id FROM subscribes
-WHERE target_id = 9;
+create table roles(
+    id serial,
+    name varchar(50) not null,
+    primary key(id)
+);
 
-/*поиск подписок
-пусть я id=6
-*/
-SELECT target_id FROM subscribes
-WHERE source_id = 6;
+create table users_roles(
+    user_id bigint not null,
+    role_id int not null,
+    primary key (user_id, role_id),
+    foreign key(user_id) references users(id),
+    foreign key (role_id) references roles(id)
+);
 
-/*поиск друзей
-пусть я id=6
-*/
-
-SELECT source_id FROM subscribes outer_subscribes
-WHERE target_id = 2 AND EXISTS(SELECT * FROM subscribes WHERE source_id=outer_subscribes.target_id
-                                                          AND target_id = outer_subscribes.source_id);
-
-SELECT * FROM subscribes
-WHERE target_id = 2;
+insert into roles(name)
+values ('ROLE_USER'), ('ROLE_ADMIN')

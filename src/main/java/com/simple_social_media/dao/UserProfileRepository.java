@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface UserProfileRepository extends JpaRepository<UserProfile,Integer> {
+public interface UserProfileRepository extends JpaRepository<UserProfile,Long> {
 
 }
