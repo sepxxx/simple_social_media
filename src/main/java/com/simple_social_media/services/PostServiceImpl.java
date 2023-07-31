@@ -1,10 +1,9 @@
 package com.simple_social_media.services;
 
 
-import com.simple_social_media.dao.PostRepository;
+import com.simple_social_media.repositories.PostRepository;
 import com.simple_social_media.entity.Post;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

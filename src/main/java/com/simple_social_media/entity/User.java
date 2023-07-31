@@ -3,6 +3,7 @@ package com.simple_social_media.entity;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import lombok.Data;
 
@@ -46,7 +47,7 @@ public class User {
     @JoinTable(name = "users_roles",
     joinColumns = @JoinColumn(name="user_id"),
     inverseJoinColumns = @JoinColumn(name="role_id"))
-    private List<Role> roles;
+    private Collection<Role> roles;
 
     public void addSubscriberToUser(User user) {
         if(subscribers==null) {
