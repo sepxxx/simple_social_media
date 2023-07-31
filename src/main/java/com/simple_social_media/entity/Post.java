@@ -1,8 +1,10 @@
 package com.simple_social_media.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name="post")
 public class Post {
     @Id
@@ -29,38 +31,6 @@ public class Post {
     public Post(String header, String text, String image_url) {
         this.header = header;
         this.text = text;
-        this.image_url = image_url;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getHeader() {
-        return header;
-    }
-
-    public void setHeader(String header) {
-        this.header = header;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getImage_url() {
-        return image_url;
-    }
-
-    public void setImage_url(String image_url) {
         this.image_url = image_url;
     }
 }
