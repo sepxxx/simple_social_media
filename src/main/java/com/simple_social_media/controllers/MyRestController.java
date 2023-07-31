@@ -47,19 +47,19 @@ public class MyRestController {
         return "deleted userProfile id: "+id+" from db";
     }
 
-    @GetMapping("/userProfiles/{id}/posts")
-    public List<Post> getAllUserProfilePosts(@PathVariable int id) {
-        return userProfileService.getAllUserProfilePosts(id);
-    }
+
     //USERPROFILE
 
 
-    //POST
+    /////////////////////////////////////POSTs
     @GetMapping("/posts/{id}")
     public Post getPost(@PathVariable int id) {
         return postService.getPost(id);
     }
-
+    @GetMapping("/userProfiles/{id}/posts")
+    public List<Post> getAllUserProfilePosts(@PathVariable int id) {
+        return userProfileService.getAllUserProfilePosts(id);
+    }
     @PostMapping("/userProfiles/{id}/posts")
     public Post addPost(@RequestBody Post post, @PathVariable int id) {
         //получаем пользователя, если есть
@@ -80,5 +80,17 @@ public class MyRestController {
         postService.deletePost(id);
         return "deleted user post with id: "+id+" from db";
     }
+    /////////////////////////////////////POSTs
+
+    /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
+    @GetMapping("/userProfiles/{id}/subscriptions")
+    public List<UserProfile> getAllUserProfileSubscriptions(@PathVariable int id) {
+        return userProfileService.getAllUserProfileSubscriptions(id);
+    }
+    @GetMapping("/userProfiles/{id}/subscribers")
+    public List<UserProfile> getAllUserProfileSubscribers(@PathVariable int id) {
+        return userProfileService.getAllUserProfileSubscribes(id);
+    }
+    /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
 
 }

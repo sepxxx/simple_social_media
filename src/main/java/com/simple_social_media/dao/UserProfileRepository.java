@@ -8,8 +8,4 @@ import java.util.List;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile,Integer> {
 
-
-//    @Query("SELECT up.post_id FROM user_post up WHERE up.user_id = :userId")
-//    List<Long> findAllPostIdsByUserId(int userId);
-
 }

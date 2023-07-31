@@ -18,4 +18,7 @@ public interface UserProfileService {
 
         List<Post> getAllUserProfilePosts(int id);
 
+        List<UserProfile> getAllUserProfileSubscriptions(int id);
+        List<UserProfile> getAllUserProfileSubscribes(int id);
+
 }

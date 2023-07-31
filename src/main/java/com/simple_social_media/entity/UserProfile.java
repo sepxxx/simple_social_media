@@ -28,9 +28,49 @@ public class UserProfile {
     private List<Post> posts;
 
 
+
+    @ManyToMany
+    @JoinTable(name="subscribes",
+            joinColumns=@JoinColumn(name="source_id"),
+            inverseJoinColumns=@JoinColumn(name="target_id")
+    )
+    private List<UserProfile> subscriptions;
+
+    @ManyToMany
+    @JoinTable(name="subscribes",
+            joinColumns=@JoinColumn(name="target_id"),
+            inverseJoinColumns=@JoinColumn(name="source_id")
+    )
+    private List<UserProfile> subscribers;
+
     public List<Post> getPosts() {
         return posts;
     }
+
+    public List<UserProfile> getSubscriptions() {
+        return subscriptions;
+    }
+
+
+    public List<UserProfile> getSubscribers() {
+        return subscribers;
+    }
+    public void addSubscriberToUser(UserProfile userProfile) {
+        if(subscribers==null) {
+            subscribers = new ArrayList<>();
+        } else {
+            subscribers.add(userProfile);
+        }
+    }
+
+    public void addSubscriptionToUser(UserProfile userProfile) {
+        if(subscriptions==null) {
+            subscriptions = new ArrayList<>();
+        }else {
+            subscriptions.add(userProfile);
+        }
+     }
+
 
     public void addPostToUser(Post post) {
         if(posts==null) {

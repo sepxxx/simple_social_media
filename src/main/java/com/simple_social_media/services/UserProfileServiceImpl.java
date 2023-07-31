@@ -3,6 +3,7 @@ package com.simple_social_media.services;
 import com.simple_social_media.dao.UserProfileRepository;
 import com.simple_social_media.entity.Post;
 import com.simple_social_media.entity.UserProfile;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +11,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserProfileServiceImpl implements UserProfileService{
-    @Autowired
-    private UserProfileRepository userProfileRepository;
+    private final UserProfileRepository userProfileRepository;
 
     @Override
     public List<UserProfile> getAllUserProfiles() {
@@ -41,8 +42,26 @@ public class UserProfileServiceImpl implements UserProfileService{
 
     @Override
     public List<Post> getAllUserProfilePosts(int id) {
+        //используем уже готовый метод работающий с репозиторием
         UserProfile userProfile = getUserProfile(id);
         if(userProfile==null) return null;
         return userProfile.getPosts();
+    }
+
+
+    @Override
+    public List<UserProfile> getAllUserProfileSubscriptions(int id) {
+        //используем уже готовый метод работающий с репозиторием
+        UserProfile userProfile = getUserProfile(id);
+        if(userProfile==null) return null;
+        return userProfile.getSubscriptions();
+    }
+
+    @Override
+    public List<UserProfile> getAllUserProfileSubscribes(int id) {
+        //используем уже готовый метод работающий с репозиторием
+        UserProfile userProfile = getUserProfile(id);
+        if(userProfile==null) return null;
+        return userProfile.getSubscribers();
     }
 }

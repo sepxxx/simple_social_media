@@ -3,6 +3,7 @@ package com.simple_social_media.services;
 
 import com.simple_social_media.dao.PostRepository;
 import com.simple_social_media.entity.Post;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class PostServiceImpl implements PostService{
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
     @Override
     public List<Post> getAllPosts() {
