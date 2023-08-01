@@ -18,29 +18,29 @@ public class MainController {
     private final PostService postService;
 
     //USERPROFILE
-    @GetMapping("/userProfiles")
+    @GetMapping("/users")
     public List<User> showAllUserProfiles() {
         return userService.getAllUserProfiles();
     }
 
-    @GetMapping("/userProfiles/{id}")
+    @GetMapping("/users/{id}")
     public User getUserProfile(@PathVariable Long id) {
         return userService.getUserProfile(id);
     }
 
-    @PostMapping("/userProfiles")
+    @PostMapping("/users")
     public User addUserProfile(@RequestBody User user) {
         userService.saveUserProfile(user);
         return user;
     }
 
-    @PutMapping("/userProfiles")
+    @PutMapping("/users")
     public User updateUserProfile(@RequestBody User user) {
         userService.saveUserProfile(user);
         return user;
     }
 
-    @DeleteMapping("/userProfiles/{id}")
+    @DeleteMapping("/users/{id}")
     public String deleteUserProfile(@PathVariable Long id) {
         userService.deleteUserProfile(id);
         return "deleted userProfile id: "+id+" from db";
@@ -55,11 +55,11 @@ public class MainController {
     public Post getPost(@PathVariable Long id) {
         return postService.getPost(id);
     }
-    @GetMapping("/userProfiles/{id}/posts")
+    @GetMapping("/users/{id}/posts")
     public List<Post> getAllUserProfilePosts(@PathVariable Long id) {
         return userService.getAllUserProfilePosts(id);
     }
-    @PostMapping("/userProfiles/{id}/posts")
+    @PostMapping("/users/{id}/posts")
     public Post addPost(@RequestBody Post post, @PathVariable Long id) {
         //получаем пользователя, если есть
         //добавляем в его список постов пост
@@ -82,11 +82,11 @@ public class MainController {
     /////////////////////////////////////POSTs
 
     /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
-    @GetMapping("/userProfiles/{id}/subscriptions")
+    @GetMapping("/users/{id}/subscriptions")
     public List<User> getAllUserProfileSubscriptions(@PathVariable Long id) {
         return userService.getAllUserProfileSubscriptions(id);
     }
-    @GetMapping("/userProfiles/{id}/subscribers")
+    @GetMapping("/users/{id}/subscribers")
     public List<User> getAllUserProfileSubscribers(@PathVariable Long id) {
         return userService.getAllUserProfileSubscribes(id);
     }
