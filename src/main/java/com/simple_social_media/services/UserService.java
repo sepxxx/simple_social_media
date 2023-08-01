@@ -60,18 +60,18 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+//
+//    public void saveUser(User user) {
+//        userRepository.save(user);
+//    }
 
 
-
-    public List<User> getAllUserProfiles() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public void saveUserProfile(User user) {
-        userRepository.save(user);
-    }
 
-    public User getUserProfile(Long id) {
+    public User getUser(Long id) {
         Optional<User> optional = userRepository.findById(id);
         User user = null;
         if(optional.isPresent())
@@ -79,29 +79,29 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public void deleteUserProfile(Long id) {
+    public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
 
-    public List<Post> getAllUserProfilePosts(Long id) {
+    public List<Post> getAllUserPosts(Long id) {
         //используем уже готовый метод работающий с репозиторием
-        User user = getUserProfile(id);
+        User user = getUser(id);
         if(user ==null) return null;
         return user.getPosts();
     }
 
 
-    public List<User> getAllUserProfileSubscriptions(Long id) {
+    public List<User> getAllUserSubscriptions(Long id) {
         //используем уже готовый метод работающий с репозиторием
-        User user = getUserProfile(id);
+        User user = getUser(id);
         if(user ==null) return null;
         return user.getSubscriptions();
     }
 
-    public List<User> getAllUserProfileSubscribes(Long id) {
+    public List<User> getAllUserSubscribes(Long id) {
         //используем уже готовый метод работающий с репозиторием
-        User user = getUserProfile(id);
+        User user = getUser(id);
         if(user ==null) return null;
         return user.getSubscribers();
     }

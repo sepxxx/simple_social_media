@@ -19,30 +19,30 @@ public class MainController {
 
     //USERPROFILE
     @GetMapping("/users")
-    public List<User> showAllUserProfiles() {
-        return userService.getAllUserProfiles();
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping("/users/{id}")
-    public User getUserProfile(@PathVariable Long id) {
-        return userService.getUserProfile(id);
+    public User getUser(@PathVariable Long id) {
+        return userService.getUser(id);
     }
 
     @PostMapping("/users")
-    public User addUserProfile(@RequestBody User user) {
-        userService.saveUserProfile(user);
+    public User saveUser(@RequestBody User user) {
+        userService.saveUser(user);
         return user;
     }
 
     @PutMapping("/users")
-    public User updateUserProfile(@RequestBody User user) {
-        userService.saveUserProfile(user);
+    public User updateUser(@RequestBody User user) {
+        userService.saveUser(user);
         return user;
     }
 
     @DeleteMapping("/users/{id}")
-    public String deleteUserProfile(@PathVariable Long id) {
-        userService.deleteUserProfile(id);
+    public String deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
         return "deleted userProfile id: "+id+" from db";
     }
 
@@ -56,16 +56,16 @@ public class MainController {
         return postService.getPost(id);
     }
     @GetMapping("/users/{id}/posts")
-    public List<Post> getAllUserProfilePosts(@PathVariable Long id) {
-        return userService.getAllUserProfilePosts(id);
+    public List<Post> getAllUserPosts(@PathVariable Long id) {
+        return userService.getAllUserPosts(id);
     }
     @PostMapping("/users/{id}/posts")
-    public Post addPost(@RequestBody Post post, @PathVariable Long id) {
+    public Post savePost(@RequestBody Post post, @PathVariable Long id) {
         //получаем пользователя, если есть
         //добавляем в его список постов пост
         //сохраняем пост в табличку
         //если нет, то ничего не делаем
-        User user = userService.getUserProfile(id);
+        User user = userService.getUser(id);
         if(user ==null) return null;
         user.addPostToUser(post);
         //нужно скорее всего будет обновить юзера в табличке чтобы запись была в jointable
@@ -83,12 +83,12 @@ public class MainController {
 
     /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
     @GetMapping("/users/{id}/subscriptions")
-    public List<User> getAllUserProfileSubscriptions(@PathVariable Long id) {
-        return userService.getAllUserProfileSubscriptions(id);
+    public List<User> getAllUserSubscriptions(@PathVariable Long id) {
+        return userService.getAllUserSubscriptions(id);
     }
     @GetMapping("/users/{id}/subscribers")
-    public List<User> getAllUserProfileSubscribers(@PathVariable Long id) {
-        return userService.getAllUserProfileSubscribes(id);
+    public List<User> getAllUserSubscribers(@PathVariable Long id) {
+        return userService.getAllUserSubscribes(id);
     }
     /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
 
