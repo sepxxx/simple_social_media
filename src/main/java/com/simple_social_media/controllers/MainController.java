@@ -28,17 +28,17 @@ public class MainController {
         return userService.getUser(id);
     }
 
-    @PostMapping("/users")
-    public User saveUser(@RequestBody User user) {
-        userService.saveUser(user);
-        return user;
-    }
-
-    @PutMapping("/users")
-    public User updateUser(@RequestBody User user) {
-        userService.saveUser(user);
-        return user;
-    }
+//    @PostMapping("/users")
+//    public User saveUser(@RequestBody User user) {
+//        userService.saveUser(user);
+//        return user;
+//    }
+//
+//    @PutMapping("/users")
+//    public User updateUser(@RequestBody User user) {
+//        userService.saveUser(user);
+//        return user;
+//    }
 
     @DeleteMapping("/users/{id}")
     public String deleteUser(@PathVariable Long id) {

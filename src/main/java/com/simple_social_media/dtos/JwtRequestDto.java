@@ -3,7 +3,7 @@ package com.simple_social_media.dtos;
 import lombok.Data;
 
 @Data
-public class JwtRequest {
+public class JwtRequestDto {
     private String username;
     private String password;
 }

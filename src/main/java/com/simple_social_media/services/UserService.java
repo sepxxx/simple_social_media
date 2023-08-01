@@ -1,5 +1,6 @@
 package com.simple_social_media.services;
 
+import com.simple_social_media.dtos.UserRegistrationDto;
 import com.simple_social_media.entities.Post;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.repositories.RoleRepository;
@@ -10,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,8 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     //F:здесь лучше инжектить сервис для ролей
     private final RoleRepository roleRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     //в туторе используют UserDetails, но мне нужно еще id пользователя в каждом запросе
     //поэтому буду использовать User для формирования jwt
@@ -54,10 +58,15 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public void saveUser(User user) {
+    public User saveUser(UserRegistrationDto userRegistrationDto) {
+        User user = new User();
+        user.setMail(userRegistrationDto.getEmail());
+        user.setPassword(passwordEncoder.encode(userRegistrationDto.getPassword()));
+        user.setName(userRegistrationDto.getUsername());
+
         //F: возвращается optional и хорошо бы обработать
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
 //
