@@ -1,7 +1,7 @@
 package com.simple_social_media.services;
 
-import com.simple_social_media.entity.Post;
-import com.simple_social_media.entity.User;
+import com.simple_social_media.entities.Post;
+import com.simple_social_media.entities.User;
 import com.simple_social_media.repositories.RoleRepository;
 import com.simple_social_media.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -23,8 +23,12 @@ public class UserService implements UserDetailsService {
     //F:здесь лучше инжектить сервис для ролей
     private final RoleRepository roleRepository;
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByName(username);
+    //в туторе используют UserDetails, но мне нужно еще id пользователя в каждом запросе
+    //поэтому буду использовать User для формирования jwt
+    public User findByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByName(username).
+                orElseThrow(()->new UsernameNotFoundException(String.
+                        format("Пользователь %s не найден",username)));
     }
 
 
@@ -36,7 +40,7 @@ public class UserService implements UserDetailsService {
         //найти юзера
         //затем преобразовать к виду, который понимает spring
         //те к UserDetails предоставляющему необходимую информацию для построения объекта Authentication
-        User user = findByUsername(username).
+        User user = userRepository.findByName(username).
                 orElseThrow(()->new UsernameNotFoundException(String.
                         format("Пользователь %s не найден",username)));
 

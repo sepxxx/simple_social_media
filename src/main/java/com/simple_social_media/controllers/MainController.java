@@ -1,7 +1,7 @@
 package com.simple_social_media.controllers;
 
-import com.simple_social_media.entity.Post;
-import com.simple_social_media.entity.User;
+import com.simple_social_media.entities.Post;
+import com.simple_social_media.entities.User;
 import com.simple_social_media.services.PostService;
 import com.simple_social_media.services.UserService;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,7 @@
 package com.simple_social_media.utils;
 
 
-import com.simple_social_media.entity.Role;
-import com.simple_social_media.entity.User;
+import com.simple_social_media.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

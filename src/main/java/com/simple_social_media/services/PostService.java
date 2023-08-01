@@ -2,7 +2,7 @@ package com.simple_social_media.services;
 
 
 import com.simple_social_media.repositories.PostRepository;
-import com.simple_social_media.entity.Post;
+import com.simple_social_media.entities.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

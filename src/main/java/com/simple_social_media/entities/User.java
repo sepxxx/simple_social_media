@@ -1,4 +1,4 @@
-package com.simple_social_media.entity;
+package com.simple_social_media.entities;
 
 import jakarta.persistence.*;
 
@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="user_profile")
+@Table(name="users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
