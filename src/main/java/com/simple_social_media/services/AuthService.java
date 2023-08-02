@@ -48,7 +48,7 @@ public class AuthService {
 
     public ResponseEntity<?> createNewUser(UserRegistrationDto userRegistrationDto) {
 
-        if (userService.findByUsername(userRegistrationDto.getUsername())!=null) {
+        if (userService.existsByName(userRegistrationDto.getUsername())) {
             return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), "Пользователь с указанным именем уже существует"), HttpStatus.BAD_REQUEST);
         }
         User user = userService.saveUser(userRegistrationDto);

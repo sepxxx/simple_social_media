@@ -35,6 +35,9 @@ public class UserService implements UserDetailsService {
                         format("Пользователь %s не найден",username)));
     }
 
+    public Boolean existsByName(String username){
+        return userRepository.existsByName(username);
+    }
 
 
     @Override

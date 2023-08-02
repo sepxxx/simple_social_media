@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
-    @PostMapping("/auth")
-    public ResponseEntity<?> createAuthToken(@RequestBody JwtRequestDto jwtRequestDto) {
-        return authService.createAuthToken(jwtRequestDto);
-    }
 
     @PostMapping("/reg")
     public ResponseEntity<?> createNewUser(@RequestBody UserRegistrationDto userRegistrationDto) {
-            return authService.createNewUser(userRegistrationDto);
+        return authService.createNewUser(userRegistrationDto);
+    }
+    @PostMapping("/auth")
+    public ResponseEntity<?> createAuthToken(@RequestBody JwtRequestDto jwtRequestDto) {
+        return authService.createAuthToken(jwtRequestDto);
     }
 
 }
