@@ -1,10 +1,11 @@
 package com.simple_social_media.services;
 
-import com.simple_social_media.dtos.UserRegistrationDto;
+import com.simple_social_media.dtos.requests.UserRegistrationRequest;
 import com.simple_social_media.entities.Post;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.repositories.RoleRepository;
 import com.simple_social_media.repositories.UserRepository;
+import com.simple_social_media.security.CustomUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,12 +28,8 @@ public class UserService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
-    //в туторе используют UserDetails, но мне нужно еще id пользователя в каждом запросе
-    //поэтому буду использовать User для формирования jwt
-    public User findByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByName(username).
-                orElseThrow(()->new UsernameNotFoundException(String.
-                        format("Пользователь %s не найден",username)));
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByName(username);
     }
 
     public Boolean existsByName(String username){
@@ -47,25 +44,26 @@ public class UserService implements UserDetailsService {
         //найти юзера
         //затем преобразовать к виду, который понимает spring
         //те к UserDetails предоставляющему необходимую информацию для построения объекта Authentication
-        User user = userRepository.findByName(username).
+        User user = findByUsername(username).
                 orElseThrow(()->new UsernameNotFoundException(String.
                         format("Пользователь %s не найден",username)));
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUser (
                 user.getName(),
                 user.getPassword(),
                 //нужно получить роли и отмаппить к виду нужному Spring
                 //GrantedAuthority отражает разрешения выданные пользователю в масштабе всего приложения
-                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList())
+                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()),
+                user.getId()
         );
     }
 
 
-    public User saveUser(UserRegistrationDto userRegistrationDto) {
+    public User saveUser(UserRegistrationRequest userRegistrationRequest) {
         User user = new User();
-        user.setMail(userRegistrationDto.getEmail());
-        user.setPassword(passwordEncoder.encode(userRegistrationDto.getPassword()));
-        user.setName(userRegistrationDto.getUsername());
+        user.setMail(userRegistrationRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(userRegistrationRequest.getPassword()));
+        user.setName(userRegistrationRequest.getUsername());
 
         //F: возвращается optional и хорошо бы обработать
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));

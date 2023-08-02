@@ -3,6 +3,8 @@ package com.simple_social_media.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.Date;
+
 @Entity
 @Data
 @Table(name="post")
@@ -17,6 +19,8 @@ public class Post {
     private String text;
     @Column
     private String image_url;
+    @Column
+    private Date date;
 
 
     @ManyToOne
@@ -32,5 +36,6 @@ public class Post {
         this.header = header;
         this.text = text;
         this.image_url = image_url;
+        this.date = new Date();
     }
 }

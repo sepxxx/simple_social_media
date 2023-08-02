@@ -15,7 +15,7 @@ import java.util.List;
 public class MainController {
     private final UserService userService;
 
-    private final PostService postService;
+
 
     //USERPROFILE
     @GetMapping("/users")
@@ -50,36 +50,7 @@ public class MainController {
     //USERPROFILE
 
 
-    /////////////////////////////////////POSTs
-    @GetMapping("/posts/{id}")
-    public Post getPost(@PathVariable Long id) {
-        return postService.getPost(id);
-    }
-    @GetMapping("/users/{id}/posts")
-    public List<Post> getAllUserPosts(@PathVariable Long id) {
-        return userService.getAllUserPosts(id);
-    }
-    @PostMapping("/users/{id}/posts")
-    public Post savePost(@RequestBody Post post, @PathVariable Long id) {
-        //получаем пользователя, если есть
-        //добавляем в его список постов пост
-        //сохраняем пост в табличку
-        //если нет, то ничего не делаем
-        User user = userService.getUser(id);
-        if(user ==null) return null;
-        user.addPostToUser(post);
-        //нужно скорее всего будет обновить юзера в табличке чтобы запись была в jointable
-        postService.savePost(post);
-        return post;
-    }
 
-    @DeleteMapping("/posts/{id}")
-    public String deletePost(@PathVariable Long id) {
-        //тут нужно скорее всего проверить кто отправляет запрос
-        postService.deletePost(id);
-        return "deleted user post with id: "+id+" from db";
-    }
-    /////////////////////////////////////POSTs
 
     /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
     @GetMapping("/users/{id}/subscriptions")
