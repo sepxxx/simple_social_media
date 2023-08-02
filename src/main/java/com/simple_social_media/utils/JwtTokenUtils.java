@@ -1,6 +1,7 @@
 package com.simple_social_media.utils;
 
 
+import com.simple_social_media.entities.Role;
 import com.simple_social_media.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenUtils {
@@ -24,7 +26,11 @@ public class JwtTokenUtils {
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", user.getId());
-        claims.put("roles", user.getRoles());
+
+        List<String> rolesList = user.getRoles().stream()
+                .map(Role::getName).toList();
+
+        claims.put("roles", rolesList);
 
         Date issued = new Date();
         Date expired = new Date(issued.getTime() + lifetime.toMillis());
