@@ -29,6 +29,12 @@ public class MainController {
         return userService.getUser(id);
     }
 
+    //    @GetMapping("/users/{id}/posts")
+//    public List<Post> getAllUserPosts(@PathVariable Long id) {
+//        return userService.getAllUserPosts(id);
+//    }
+//
+
 //    @PostMapping("/users")
 //    public User saveUser(@RequestBody User user) {
 //        userService.saveUser(user);

@@ -9,6 +9,7 @@ import com.simple_social_media.entities.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserService userService;
 
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
-    }
+//    public List<Post> getAllPosts() {
+//        return postRepository.findAll();
+//    }
 
 
     public ResponseEntity<?> savePost(Post post) {
@@ -34,12 +35,15 @@ public class PostService {
         if(null != securityContext.getAuthentication()){
             String contextUserName = (String) securityContext.getAuthentication().getPrincipal();
             User dbUser = userService.findByUsername(contextUserName).get();
-//            dbUser.addPostToUser(post);
+
+            //одна из записей ниже обязательно заполнит таблицу user_post
+            //не понятно нужно ли выполнять обе, но возникает ошибка
+            //            dbUser.addPostToUser(post);
             post.setUser(dbUser);
             Post postWithId =  postRepository.save(post);
-            return ResponseEntity.ok(new PostResponse(postWithId.getId(), postWithId.getHeader(),
+            return new ResponseEntity<>(new PostResponse(postWithId.getId(), postWithId.getHeader(),
                     postWithId.getText(), postWithId.getDate(), postWithId.getUser().getName(),
-                    postWithId.getImage_url()));
+                    postWithId.getImage_url()), HttpStatus.CREATED);
         }
         //стоит обработать ошибку по authentication
         //но непонятно как на данном этапе она может быть пустой
@@ -49,16 +53,50 @@ public class PostService {
     }
 
 
-    public Post getPost(Long id) {
+    public ResponseEntity<?> getPost(Long id) {
         Optional<Post> optional = postRepository.findById(id);
-        Post post = null;
-        if(optional.isPresent())
-            post = optional.get();
-        return post;
+        if(optional.isPresent()) {
+            Post post = optional.get();
+            return ResponseEntity.ok(new PostResponse(post.getId(), post.getHeader(),
+                    post.getText(), post.getDate(), post.getUser().getName(),
+                    post.getImage_url()));
+        }
+        return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                String.format("поста с id %d не существует", id)),
+                HttpStatus.BAD_REQUEST);
     }
 
 
-    public void deletePost(Long id) {
-        postRepository.deleteById(id);
+    public ResponseEntity<?> deletePost(Long id) {
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        if(null != securityContext.getAuthentication()){
+            String contextUserName = (String) securityContext.getAuthentication().getPrincipal();
+
+            //нужно переиспользовать метод из сервиса, чтобы не дублировать код
+            //но не знаю можно ли вообще так писать, тк возвращается ResponseEntity
+            ResponseEntity<?> responseEntity = getPost(id);
+            if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли пост, можно попробовать удалить
+                PostResponse postResponse = (PostResponse)getPost(id).getBody();
+                if (contextUserName.equals(postResponse.getUsernameCreatedBy())) {
+                    postRepository.deleteById(id);
+                    return ResponseEntity.ok(String.format("пост с id %d удален", id));
+                } else {
+                    return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                            "удаление запрашивает не владелец поста"),
+                            HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                return responseEntity;//иначе возвращаем что такого поста нет
+            }
+
+        } else {
+            //стоит обработать ошибку по authentication
+            //но непонятно как на данном этапе она может быть пустой
+            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                    "securityContext.getAuthentication()=null, невозможно установить владельца поста"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
     }
 }
