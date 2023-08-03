@@ -29,10 +29,10 @@ public class UserController {
         return userService.deleteUserById(id);
     }
 
-    //    @GetMapping("/users/{id}/posts")
-//    public List<Post> getAllUserPosts(@PathVariable Long id) {
-//        return userService.getAllUserPosts(id);
-//    }
+    @GetMapping("{id}/posts")
+    public ResponseEntity<?> getAllUserPostsByUserId(@PathVariable Long id) {
+        return userService.getAllUserPostsByUserId(id);
+    }
 //
 //    @PutMapping("")
 //    public User updateUser(@RequestBody User user) {

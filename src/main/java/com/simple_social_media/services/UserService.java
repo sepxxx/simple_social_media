@@ -1,7 +1,9 @@
 package com.simple_social_media.services;
 
 import com.simple_social_media.dtos.requests.UserRegistrationRequest;
+import com.simple_social_media.dtos.responses.PostResponse;
 import com.simple_social_media.dtos.responses.UserResponse;
+import com.simple_social_media.entities.Post;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.exceptions.AppError;
 import com.simple_social_media.repositories.RoleRepository;
@@ -36,6 +38,10 @@ public class UserService implements UserDetailsService {
     public Optional<User> findByUsername(String username) {
         return userRepository.findByName(username);
     }
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
 
     public Boolean existsByName(String username){
         return userRepository.existsByName(username);
@@ -130,12 +136,27 @@ public class UserService implements UserDetailsService {
     }
 
 
-//    public List<Post> getAllUserPosts(Long id) {
-//        //используем уже готовый метод работающий с репозиторием
-//        User user = getUser(id);
-//        if(user ==null) return null;
-//        return user.getPosts();
-//    }
+    public ResponseEntity<?> getAllUserPostsByUserId(Long id) {
+        //здесь нет смысла использовать методы  existsByName
+        //и getUserById тк затем придется обращаться к полю Posts юзера
+
+        Optional<User> optional = userRepository.findById(id);
+        if (optional.isPresent()) {
+            User user = optional.get();
+            //отмаппим список постов к списку PostResponse
+            List<Post> postsList = user.getPosts();
+            List<PostResponse> postResponseList = postsList.stream().map(p -> new PostResponse(p.getId(),
+                    p.getHeader(),p.getText(),p.getDate(),p.getUser().getName(),p.getImage_url())).toList();
+            return ResponseEntity.ok(postResponseList);
+        }
+        else {
+            return new ResponseEntity<>(String.format("нет юзера с id %d ", id), HttpStatus.NOT_FOUND);
+        }
+
+    }
+
+
+
 //
 //
 //    public List<User> getAllUserSubscriptions(Long id) {
