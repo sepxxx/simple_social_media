@@ -7,6 +7,7 @@ import com.simple_social_media.security.CustomUser;
 import com.simple_social_media.services.PostService;
 import com.simple_social_media.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,11 +35,8 @@ public class PostsController {
 //    }
 //
     @PostMapping("/posts/new")
-    public Post savePost(@RequestBody PostRequest pR) {
-
-        Post post = new Post(pR.getHeader(),pR.getText(), pR.getImage_url());;
-        post = postService.savePost(post);
-        return post;
+    public ResponseEntity<?> savePost(@RequestBody PostRequest pR) {
+        return postService.savePost(new Post(pR.getHeader(),pR.getText(), pR.getImage_url()));
     }
 
 //    @PostMapping("/users/{id}/posts")

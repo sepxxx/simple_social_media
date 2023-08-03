@@ -5,6 +5,7 @@ import com.simple_social_media.entities.User;
 import com.simple_social_media.services.PostService;
 import com.simple_social_media.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class MainController {
 
     //USERPROFILE
     @GetMapping("/users")
-    public List<User> getAllUsers() {
+    public ResponseEntity<?> getAllUsers() {
         return userService.getAllUsers();
     }
 

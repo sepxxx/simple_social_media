@@ -1,6 +1,7 @@
 package com.simple_social_media.services;
 
 import com.simple_social_media.dtos.requests.UserRegistrationRequest;
+import com.simple_social_media.dtos.responses.UserResponse;
 import com.simple_social_media.entities.Post;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.repositories.RoleRepository;
@@ -8,6 +9,7 @@ import com.simple_social_media.repositories.UserRepository;
 import com.simple_social_media.security.CustomUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -76,8 +78,12 @@ public class UserService implements UserDetailsService {
 //    }
 
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public ResponseEntity<?> getAllUsers() {
+        //нужно отмаппить лист юзеров к листу UserResponse(id,email,name)
+        //те по факту отбрасываем доп данные юзера
+        List<User> users = userRepository.findAll();
+        List<UserResponse> userResponses = users.stream().map(user -> new UserResponse(user.getId(), user.getName(), user.getMail())).toList();
+        return ResponseEntity.ok(userResponses);
     }
 
 

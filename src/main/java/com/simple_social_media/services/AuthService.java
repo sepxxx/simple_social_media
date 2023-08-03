@@ -26,7 +26,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtils jwtTokenUtils;
 
-    public ResponseEntity<?> createAuthToken( JwtRequest jwtRequest) {
+    public ResponseEntity<?> createAuthToken(JwtRequest jwtRequest) {
         //сначала проверим есть ли в базе
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtRequest.getUsername(), jwtRequest.getPassword()));
