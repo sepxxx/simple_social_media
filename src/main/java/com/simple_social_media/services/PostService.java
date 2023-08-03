@@ -8,6 +8,7 @@ import com.simple_social_media.exceptions.AppError;
 import com.simple_social_media.repositories.PostRepository;
 import com.simple_social_media.entities.Post;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+
 public class PostService {
 
     private final PostRepository postRepository;
@@ -67,40 +69,13 @@ public class PostService {
                     String.format("поста с id %d не существует", id)),
                     HttpStatus.NOT_FOUND);
         }
+
     }
 
 
     public ResponseEntity<?> deletePost(Long id) {
-
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        if(null != securityContext.getAuthentication()){
-            String contextUserName = (String) securityContext.getAuthentication().getPrincipal();
-
-            //нужно переиспользовать метод из сервиса, чтобы не дублировать код
-            //но не знаю можно ли вообще так писать, тк возвращается ResponseEntity
-            ResponseEntity<?> responseEntity = getPost(id);
-            if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли пост, можно попробовать удалить
-                PostResponse postResponse = (PostResponse)getPost(id).getBody();
-                if (contextUserName.equals(postResponse.getUsernameCreatedBy())) {
                     postRepository.deleteById(id);
                     return ResponseEntity.ok(String.format("пост с id %d удален", id));
-                } else {
-                    return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
-                            "удаление запрашивает не владелец поста"),
-                            HttpStatus.FORBIDDEN);
-                }
-            } else {
-                return responseEntity;//иначе возвращаем что такого поста нет
-            }
-
-        } else {
-            //стоит обработать ошибку по authentication
-            //но непонятно как на данном этапе она может быть пустой
-            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "securityContext.getAuthentication()=null, невозможно установить владельца поста"),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
     }
 
     public ResponseEntity<?> updatePost(Long id, PostRequest pR) {
@@ -136,7 +111,7 @@ public class PostService {
                             post.getImage_url()));
                 } else {
                     return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
-                            "обвновление запрашивает не владелец поста"),
+                            "обновление запрашивает не владелец поста"),
                             HttpStatus.FORBIDDEN);
                 }
 
