@@ -47,9 +47,9 @@ public class PostService {
         }
         //стоит обработать ошибку по authentication
         //но непонятно как на данном этапе она может быть пустой
-        return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+        return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "securityContext.getAuthentication()=null, невозможно установить владельца поста"),
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -61,9 +61,9 @@ public class PostService {
                     post.getText(), post.getDate(), post.getUser().getName(),
                     post.getImage_url()));
         }
-        return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+        return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
                 String.format("поста с id %d не существует", id)),
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.NOT_FOUND);
     }
 
 
@@ -82,9 +82,9 @@ public class PostService {
                     postRepository.deleteById(id);
                     return ResponseEntity.ok(String.format("пост с id %d удален", id));
                 } else {
-                    return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                    return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
                             "удаление запрашивает не владелец поста"),
-                            HttpStatus.BAD_REQUEST);
+                            HttpStatus.FORBIDDEN);
                 }
             } else {
                 return responseEntity;//иначе возвращаем что такого поста нет
@@ -93,9 +93,9 @@ public class PostService {
         } else {
             //стоит обработать ошибку по authentication
             //но непонятно как на данном этапе она может быть пустой
-            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "securityContext.getAuthentication()=null, невозможно установить владельца поста"),
-                    HttpStatus.BAD_REQUEST);
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
