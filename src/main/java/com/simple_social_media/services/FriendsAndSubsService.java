@@ -170,5 +170,25 @@ public class FriendsAndSubsService {
     }
 
 
+    public ResponseEntity<?> getUserSubscriptionsByUserId(Long targetUserId) {
+        //здесь нельзя применить метод userService getUserById, тк возвращается dto
+        //будем использовать findById
+        Optional<User> optionalTargetUser = userService.findById(targetUserId);
+        if(optionalTargetUser.isPresent()) {
+            User targetUser = optionalTargetUser.get();
+            //нужно отмаппить список юзеров-подписчиков в список dto userResponse
+            List<User> subscriptions = targetUser.getSubscriptions();
+            return ResponseEntity.ok(converterListUserToUserResponse(subscriptions));
+
+        } else {
+
+            return  new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                    String.format("Попытка получения списка подписчиков несуществующего юзера с id %d ",
+                            targetUserId)),
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+
+
 
 }

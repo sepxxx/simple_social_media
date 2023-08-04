@@ -45,6 +45,11 @@ public class FriendsAndSubsController {
     public ResponseEntity<?> getUserSubscribersByUserId(@PathVariable Long targetUserId) {
         return friendsAndSubsService.getUserSubscribersByUserId(targetUserId);
     }
+    @GetMapping("{targetUserId}/subscriptions")
+    public ResponseEntity<?> getUserSubscriptionsByUserId(@PathVariable Long targetUserId) {
+        return friendsAndSubsService.getUserSubscriptionsByUserId(targetUserId);
+    }
+
 
 
 
