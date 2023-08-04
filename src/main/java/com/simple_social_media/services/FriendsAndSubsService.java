@@ -124,6 +124,16 @@ public class FriendsAndSubsService {
 
     }
 
+    public ResponseEntity<?> getCurrentUserSubscribers() {
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User sourceUser = userService.findByUsername(contextUserName).get();
+
+        List<User> subscribers = sourceUser.getSubscribers();
+        List<UserResponse> userResponses = subscribers.stream().map(sub->
+                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+        return ResponseEntity.ok(userResponses);
+    }
+
     public ResponseEntity<?> getUserSubscribersByUserId(Long targetUserId) {
         //здесь нельзя применить метод userService getUserById, тк возвращается dto
         //будем использовать findById

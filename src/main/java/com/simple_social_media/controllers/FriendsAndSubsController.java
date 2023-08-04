@@ -33,6 +33,11 @@ public class FriendsAndSubsController {
         return friendsAndSubsService.getCurrentUserActiveFriendRequests();
     }
 
+    @GetMapping("mySubscribers")
+    public ResponseEntity<?> getCurrentUserSubscribers() {
+        return friendsAndSubsService.getCurrentUserSubscribers();
+    }
+
     @GetMapping("subscribers/{targetUserId}")
     public ResponseEntity<?> getUserSubscribersByUserId(@PathVariable Long targetUserId) {
         return friendsAndSubsService.getUserSubscribersByUserId(targetUserId);
