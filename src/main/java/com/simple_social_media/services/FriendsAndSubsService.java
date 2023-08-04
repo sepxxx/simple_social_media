@@ -32,6 +32,11 @@ public class FriendsAndSubsService {
     //для сохранения объекта User например
     private final UserRepository userRepository;
 
+    public List<UserResponse> converterListUserToUserResponse(List<User> listToOperate) {
+        return listToOperate.stream().map(sub->
+                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+    }
+
 
     public ResponseEntity<?> sendFriendRequestByUserId(Long targetUserId) {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -102,10 +107,9 @@ public class FriendsAndSubsService {
         List<User> subscriptions = sourceUser.getSubscriptions();
         List<User> subscribers = sourceUser.getSubscribers();
         subscribers.removeAll(subscriptions);//subscribers->activeFriendRequests
-
-        List<UserResponse> userResponses = subscribers.stream().map(sub->
-                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
-        return ResponseEntity.ok(userResponses);
+//        List<UserResponse> userResponses = subscribers.stream().map(sub->
+//                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+        return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
 
     }
 
@@ -118,9 +122,9 @@ public class FriendsAndSubsService {
         User sourceUser = userService.findByUsername(contextUserName).get();
         //нужно отмаппить список юзеров-подписок в список dto userResponse
         List<User> subscriptions = sourceUser.getSubscriptions();
-        List<UserResponse> userResponses = subscriptions.stream().map(sub->
-                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
-        return ResponseEntity.ok(userResponses);
+//        List<UserResponse> userResponses = subscriptions.stream().map(sub->
+//                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+        return ResponseEntity.ok(converterListUserToUserResponse(subscriptions));
 
     }
 
@@ -129,9 +133,9 @@ public class FriendsAndSubsService {
         User sourceUser = userService.findByUsername(contextUserName).get();
 
         List<User> subscribers = sourceUser.getSubscribers();
-        List<UserResponse> userResponses = subscribers.stream().map(sub->
-                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
-        return ResponseEntity.ok(userResponses);
+//        List<UserResponse> userResponses = subscribers.stream().map(sub->
+//                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+        return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
     }
 
     public ResponseEntity<?> getUserSubscribersByUserId(Long targetUserId) {
@@ -142,9 +146,9 @@ public class FriendsAndSubsService {
             User targetUser = optionalTargetUser.get();
             //нужно отмаппить список юзеров-подписчиков в список dto userResponse
             List<User> subscribers = targetUser.getSubscribers();
-            List<UserResponse> userResponses = subscribers.stream().map(sub->
-                    new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
-            return ResponseEntity.ok(userResponses);
+//            List<UserResponse> userResponses = subscribers.stream().map(sub->
+//                    new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+            return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
 
         } else {
 
