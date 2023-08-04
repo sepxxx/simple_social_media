@@ -32,9 +32,8 @@ public class FriendsAndSubsService {
     //для сохранения объекта User например
     private final UserRepository userRepository;
 
-    //!!!!!!!!!
-    ///здесь нужно проверить подписан ли уже пользователь
-    public ResponseEntity<?> sendFriendRequest(Long targetUserId) {
+
+    public ResponseEntity<?> sendFriendRequestByUserId(Long targetUserId) {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //здесь не нужно проверять optional,тк перед попаданием в контекст
         //source юзера ищут в базе
@@ -45,16 +44,21 @@ public class FriendsAndSubsService {
         Optional<User> optionalTargetUser = userService.findById(targetUserId);
         if(optionalTargetUser.isPresent()) {
             User targetUser = optionalTargetUser.get();
-            sourceUser.addSubscriptionToUser(targetUser);
-            targetUser.addSubscriberToUser(sourceUser);
-//            userRepository.save(targetUser);
 
-            //снова эта проблема с JoinTable, каждый из методов
-            //триггерит добавление записи в JoinTable, не понятно как быть
-            userRepository.save(sourceUser);
+            if(targetUser.getSubscribers().contains(sourceUser)){//если source user уже подписан на target_user
+                return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                        String.format("Юзер с id %d уже подписан на id %d", sourceUser.getId(),
+                                targetUserId)),
+                        HttpStatus.BAD_REQUEST);
+            } else {
+                sourceUser.addSubscriptionToUser(targetUser);
+                targetUser.addSubscriberToUser(sourceUser);
+//            userRepository.save(targetUser); достаточно сохранить одного юзера
+                userRepository.save(sourceUser);
+                return ResponseEntity.ok(String.format("Юзер с id %d теперь подписан на id %d", sourceUser.getId(),
+                        targetUserId));
+            }
 
-            return ResponseEntity.ok(String.format("Юзер с id %d теперь подписан на id %d", sourceUser.getId(),
-                    targetUserId));
         } else {
             return new ResponseEntity<>(String.format("Попытка подписаться на/подружиться с несуществующим юзером id %d ",
                     targetUserId), HttpStatus.NOT_FOUND);
@@ -62,6 +66,48 @@ public class FriendsAndSubsService {
 
     }
 
+    public ResponseEntity<?> unsubscribeByUserId(Long targetUserId) {
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User sourceUser = userService.findByUsername(contextUserName).get();
+        Optional<User> optionalTargetUser = userService.findById(targetUserId);
+        if(optionalTargetUser.isPresent()) {
+            User targetUser = optionalTargetUser.get();
+            //cначала проверим подписан ли вообще
+            if(targetUser.getSubscribers().contains(sourceUser)) {
+                    targetUser.getSubscribers().remove(sourceUser);
+                    sourceUser.getSubscriptions().remove(targetUser);
+                    userRepository.save(sourceUser);//достаточно сохранить одного, но убрать нужно у обоих.
+
+                return ResponseEntity.ok(String.format("Юзер с id %d теперь не подписан на id %d", sourceUser.getId(),
+                        targetUserId));
+            } else {
+                return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                        String.format("Нет подписки на юзера с id %d ",
+                                targetUserId)),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+        } else {
+            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                    String.format("Попытка отписаться от несуществующего юзера с id %d ",
+                            targetUserId)),
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User sourceUser = userService.findByUsername(contextUserName).get();
+
+        List<User> subscriptions = sourceUser.getSubscriptions();
+        List<User> subscribers = sourceUser.getSubscribers();
+        subscribers.removeAll(subscriptions);//subscribers->activeFriendRequests
+
+        List<UserResponse> userResponses = subscribers.stream().map(sub->
+                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+        return ResponseEntity.ok(userResponses);
+
+    }
 
     ///cкорее всего не совсем рационально писать отдельный метод
     //под проверку личных подписок,хотя это некоторое разделение логики
@@ -78,7 +124,6 @@ public class FriendsAndSubsService {
 
     }
 
-
     public ResponseEntity<?> getUserSubscribersByUserId(Long targetUserId) {
         //здесь нельзя применить метод userService getUserById, тк возвращается dto
         //будем использовать findById
@@ -86,14 +131,17 @@ public class FriendsAndSubsService {
         if(optionalTargetUser.isPresent()) {
             User targetUser = optionalTargetUser.get();
             //нужно отмаппить список юзеров-подписчиков в список dto userResponse
-            List<User> subscriptions = targetUser.getSubscribers();
-            List<UserResponse> userResponses = subscriptions.stream().map(sub->
+            List<User> subscribers = targetUser.getSubscribers();
+            List<UserResponse> userResponses = subscribers.stream().map(sub->
                     new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
             return ResponseEntity.ok(userResponses);
 
         } else {
-            return new ResponseEntity<>(String.format("Попытка получения списка подписок несуществующего юзера с id %d ",
-                    targetUserId), HttpStatus.NOT_FOUND);
+
+            return  new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                    String.format("Попытка получения списка подписок несуществующего юзера с id %d ",
+                            targetUserId)),
+                    HttpStatus.NOT_FOUND);
         }
     }
 

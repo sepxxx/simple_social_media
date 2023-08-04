@@ -16,19 +16,33 @@ public class FriendsAndSubsController {
     private final FriendsAndSubsService friendsAndSubsService;
 
     @PostMapping("subscribe/{targetUserId}")
-    public ResponseEntity<?> sendFriendRequest(@PathVariable Long targetUserId) {
-            return friendsAndSubsService.sendFriendRequest(targetUserId);
+    public ResponseEntity<?> sendFriendRequestByUserId(@PathVariable Long targetUserId) {
+            return friendsAndSubsService.sendFriendRequestByUserId(targetUserId);
+    }
+    @PostMapping("unsubscribe/{targetUserId}")
+    public ResponseEntity<?> unsubscribeByUserId(@PathVariable Long targetUserId) {
+            return friendsAndSubsService.unsubscribeByUserId(targetUserId);
     }
 
     @GetMapping("mySubscriptions")
     public ResponseEntity<?> getCurrentUserSubscriptions() {
         return friendsAndSubsService.getCurrentUserSubscriptions();
     }
+    @GetMapping("myFriendRequests")
+    public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
+        return friendsAndSubsService.getCurrentUserActiveFriendRequests();
+    }
 
     @GetMapping("subscribers/{targetUserId}")
     public ResponseEntity<?> getUserSubscribersByUserId(@PathVariable Long targetUserId) {
         return friendsAndSubsService.getUserSubscribersByUserId(targetUserId);
     }
+
+
+
+
+
+
 
 
 }
