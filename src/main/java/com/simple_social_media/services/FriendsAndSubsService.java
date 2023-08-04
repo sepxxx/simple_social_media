@@ -25,7 +25,7 @@ public class FriendsAndSubsService {
 //3)Проверка активных заявок означает возврат списка подписчиков минус подписок
 //4)Принять запрос дружбы означает подписаться в ответ
 //5)проверка списка друзей означает возврат пересечения списков подписок и подписчиков
-//6)удалить из друзей означает удалить source_user из подписчиков target_user
+//6)удалить из друзей означает отписаться - удалить source_user из подписчиков target_user
     private final UserService userService;
     //изначально я планировал оставить все в userService, но для разделения логики вынес
     //подписки и дружбу, но по факту это тот же userService, поэтому приходится обращаться к репозиторию
@@ -38,7 +38,7 @@ public class FriendsAndSubsService {
     }
 
 
-    public ResponseEntity<?> sendFriendRequestByUserId(Long targetUserId) {
+    public ResponseEntity<?> subscribeByUserId(Long targetUserId) {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //здесь не нужно проверять optional,тк перед попаданием в контекст
         //source юзера ищут в базе
@@ -137,6 +137,16 @@ public class FriendsAndSubsService {
 //                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
         return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
     }
+
+    public ResponseEntity<?> getCurrentUserFriends() {
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User sourceUser = userService.findByUsername(contextUserName).get();
+        List<User> subscriptions = sourceUser.getSubscriptions();
+        List<User> subscribers = sourceUser.getSubscribers();
+        subscribers.retainAll(subscriptions);
+        return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
+    }
+
 
     public ResponseEntity<?> getUserSubscribersByUserId(Long targetUserId) {
         //здесь нельзя применить метод userService getUserById, тк возвращается dto

@@ -4,41 +4,44 @@ package com.simple_social_media.controllers;
 import com.simple_social_media.services.FriendsAndSubsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("users")
 public class FriendsAndSubsController {
 
     private final FriendsAndSubsService friendsAndSubsService;
 
-    @PostMapping("subscribe/{targetUserId}")
-    public ResponseEntity<?> sendFriendRequestByUserId(@PathVariable Long targetUserId) {
-            return friendsAndSubsService.sendFriendRequestByUserId(targetUserId);
+    @PostMapping("{targetUserId}/subscribers")
+    public ResponseEntity<?> subscribeByUserId(@PathVariable Long targetUserId) {
+            return friendsAndSubsService.subscribeByUserId(targetUserId);
     }
-    @PostMapping("unsubscribe/{targetUserId}")
+    @DeleteMapping("{targetUserId}/subscribers")
     public ResponseEntity<?> unsubscribeByUserId(@PathVariable Long targetUserId) {
             return friendsAndSubsService.unsubscribeByUserId(targetUserId);
     }
 
-    @GetMapping("mySubscriptions")
+    @GetMapping("me/subscriptions")
     public ResponseEntity<?> getCurrentUserSubscriptions() {
         return friendsAndSubsService.getCurrentUserSubscriptions();
     }
-    @GetMapping("myFriendRequests")
+    @GetMapping("me/friendRequests")
     public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
         return friendsAndSubsService.getCurrentUserActiveFriendRequests();
     }
 
-    @GetMapping("mySubscribers")
+    @GetMapping("me/subscribers")
     public ResponseEntity<?> getCurrentUserSubscribers() {
         return friendsAndSubsService.getCurrentUserSubscribers();
     }
+    @GetMapping("me/friends")
+    public ResponseEntity<?> getCurrentUserFriends() {
+        return friendsAndSubsService.getCurrentUserFriends();
+    }
 
-    @GetMapping("subscribers/{targetUserId}")
+
+    @GetMapping("{targetUserId}/subscribers")
     public ResponseEntity<?> getUserSubscribersByUserId(@PathVariable Long targetUserId) {
         return friendsAndSubsService.getUserSubscribersByUserId(targetUserId);
     }
