@@ -2,16 +2,15 @@ package com.simple_social_media.aspects;
 
 
 import com.simple_social_media.dtos.responses.PostResponse;
+import com.simple_social_media.dtos.responses.UserResponse;
+import com.simple_social_media.entities.User;
 import com.simple_social_media.exceptions.AppError;
 import com.simple_social_media.services.PostService;
-import com.simple_social_media.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.hibernate.event.spi.PostDeleteEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,9 +23,9 @@ import java.util.List;
 
 @Slf4j
 @Component
-@Aspect
+@org.aspectj.lang.annotation.Aspect
 @RequiredArgsConstructor
-public class CheckUsernameEqAspect {
+public class Aspect {
     private final PostService postService;
 
 //    @Around("execution(* com.simple_social_media.services.PostService.*(..))")
@@ -73,4 +72,25 @@ public class CheckUsernameEqAspect {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+
+
+    //getUserSubscribersByUserId не требует такой проверки, нужно его исключить
+    //
+    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.*(..))")
+    public Object aroundFriendsAndSubsServiceMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
+        if(null !=  SecurityContextHolder.getContext().getAuthentication()){
+            return proceedingJoinPoint.proceed();
+        } else {
+            //стоит обработать ошибку по authentication
+            //но непонятно как на данном этапе она может быть пустой
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "securityContext.getAuthentication()=null, невозможно установить владельца поста"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }

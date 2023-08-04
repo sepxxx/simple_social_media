@@ -35,11 +35,12 @@ public class User {
     )
     private List<User> subscriptions;
 
-    @ManyToMany
-    @JoinTable(name="subscribes",
-            joinColumns=@JoinColumn(name="target_id"),
-            inverseJoinColumns=@JoinColumn(name="source_id")
-    )
+//    @ManyToMany
+//    @JoinTable(name="subscribes",
+//            joinColumns=@JoinColumn(name="target_id"),
+//            inverseJoinColumns=@JoinColumn(name="source_id")
+//    )
+    @ManyToMany(mappedBy="subscriptions")
     private List<User> subscribers;
 
 
