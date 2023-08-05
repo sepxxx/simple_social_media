@@ -37,6 +37,14 @@ public class FriendsAndSubsService {
                 new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
     }
 
+    public List<User> makeUserFriendsList(User user) {
+        List<User> subscriptions = user.getSubscriptions();
+        List<User> subscribers = user.getSubscribers();
+        //для формирования списка друзей нужно пересечь списки подписчиков и подписок
+        subscribers.retainAll(subscriptions);
+        return subscribers;
+    }
+
 
     public ResponseEntity<?> subscribeByUserId(Long targetUserId) {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -103,90 +111,68 @@ public class FriendsAndSubsService {
     public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User sourceUser = userService.findByUsername(contextUserName).get();
-
         List<User> subscriptions = sourceUser.getSubscriptions();
         List<User> subscribers = sourceUser.getSubscribers();
         subscribers.removeAll(subscriptions);//subscribers->activeFriendRequests
-//        List<UserResponse> userResponses = subscribers.stream().map(sub->
-//                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
         return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
 
     }
 
-    ///cкорее всего не совсем рационально писать отдельный метод
-    //под проверку личных подписок,хотя это некоторое разделение логики
+    ///cкорее всего не совсем рационально писать отдельный метод для текущего юзера
+    //под проверку личных списков
+    //N:проверка контекста проводится в адвайсе
     public ResponseEntity<?> getCurrentUserSubscriptions() {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //здесь не нужно проверять optional,тк перед попаданием в контекст
-        //source юзера ищут в базе
+        //не проверять optional,тк перед попаданием в контекст source юзера ищут в базе
         User sourceUser = userService.findByUsername(contextUserName).get();
         //нужно отмаппить список юзеров-подписок в список dto userResponse
-        List<User> subscriptions = sourceUser.getSubscriptions();
-//        List<UserResponse> userResponses = subscriptions.stream().map(sub->
-//                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
-        return ResponseEntity.ok(converterListUserToUserResponse(subscriptions));
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                sourceUser.getSubscriptions()));
 
     }
 
     public ResponseEntity<?> getCurrentUserSubscribers() {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User sourceUser = userService.findByUsername(contextUserName).get();
-
-        List<User> subscribers = sourceUser.getSubscribers();
-//        List<UserResponse> userResponses = subscribers.stream().map(sub->
-//                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
-        return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                sourceUser.getSubscribers()));
     }
 
     public ResponseEntity<?> getCurrentUserFriends() {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User sourceUser = userService.findByUsername(contextUserName).get();
-        List<User> subscriptions = sourceUser.getSubscriptions();
-        List<User> subscribers = sourceUser.getSubscribers();
-        subscribers.retainAll(subscriptions);
-        return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                makeUserFriendsList(sourceUser)));
     }
 
 
+
+    //В 3х методах ниже нельзя применить метод userService getUserById, тк возвращается dto
+    //будем использовать findById
+    //так же проводится проверка существования юзера в advice
     public ResponseEntity<?> getUserSubscribersByUserId(Long targetUserId) {
-        //здесь нельзя применить метод userService getUserById, тк возвращается dto
-        //будем использовать findById
-        Optional<User> optionalTargetUser = userService.findById(targetUserId);
-        if(optionalTargetUser.isPresent()) {
-            User targetUser = optionalTargetUser.get();
-            //нужно отмаппить список юзеров-подписчиков в список dto userResponse
-            List<User> subscribers = targetUser.getSubscribers();
-//            List<UserResponse> userResponses = subscribers.stream().map(sub->
-//                    new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
-            return ResponseEntity.ok(converterListUserToUserResponse(subscribers));
+        User targetUser = userService.findById(targetUserId).get();
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                targetUser.getSubscribers()
+        ));
 
-        } else {
-
-            return  new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    String.format("Попытка получения списка подписок несуществующего юзера с id %d ",
-                            targetUserId)),
-                    HttpStatus.NOT_FOUND);
-        }
     }
 
 
     public ResponseEntity<?> getUserSubscriptionsByUserId(Long targetUserId) {
-        //здесь нельзя применить метод userService getUserById, тк возвращается dto
-        //будем использовать findById
-        Optional<User> optionalTargetUser = userService.findById(targetUserId);
-        if(optionalTargetUser.isPresent()) {
-            User targetUser = optionalTargetUser.get();
-            //нужно отмаппить список юзеров-подписчиков в список dto userResponse
-            List<User> subscriptions = targetUser.getSubscriptions();
-            return ResponseEntity.ok(converterListUserToUserResponse(subscriptions));
+        User targetUser = userService.findById(targetUserId).get();
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                targetUser.getSubscriptions()
+        ));
+    }
 
-        } else {
 
-            return  new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    String.format("Попытка получения списка подписчиков несуществующего юзера с id %d ",
-                            targetUserId)),
-                    HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<?> getUserFriendsByUserId(Long targetUserId) {
+        User targetUser = userService.findById(targetUserId).get();
+            return ResponseEntity.ok(converterListUserToUserResponse(
+                    makeUserFriendsList(targetUser)
+            ));
+
     }
 
 

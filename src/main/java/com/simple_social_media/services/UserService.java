@@ -46,6 +46,7 @@ public class UserService implements UserDetailsService {
     public Boolean existsByName(String username){
         return userRepository.existsByName(username);
     }
+    public Boolean existsById(Long id) {return userRepository.existsById(id);}
 
 
     @Override
@@ -157,19 +158,5 @@ public class UserService implements UserDetailsService {
 
 
 
-//
-//
-//    public List<User> getAllUserSubscriptions(Long id) {
-//        //используем уже готовый метод работающий с репозиторием
-//        User user = getUser(id);
-//        if(user ==null) return null;
-//        return user.getSubscriptions();
-//    }
-//
-//    public List<User> getAllUserSubscribes(Long id) {
-//        //используем уже готовый метод работающий с репозиторием
-//        User user = getUser(id);
-//        if(user ==null) return null;
-//        return user.getSubscribers();
-//    }
+
 }

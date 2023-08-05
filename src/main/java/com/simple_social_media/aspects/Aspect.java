@@ -6,6 +6,7 @@ import com.simple_social_media.dtos.responses.UserResponse;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.exceptions.AppError;
 import com.simple_social_media.services.PostService;
+import com.simple_social_media.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
@@ -27,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Aspect {
     private final PostService postService;
+    private final UserService userService;
 
 //    @Around("execution(* com.simple_social_media.services.PostService.*(..))")
 //    public Object aroundPostServiceMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
@@ -77,10 +80,9 @@ public class Aspect {
 
 
 
-    //getUserSubscribersByUserId не требует такой проверки, нужно его исключить
-    //
-    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.*(..))")
-    public Object aroundFriendsAndSubsServiceMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
+
+    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.getCurrentUser*(..))")
+    public Object aroundFriendsAndSubsServiceCurrentUserMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
         if(null !=  SecurityContextHolder.getContext().getAuthentication()){
             return proceedingJoinPoint.proceed();
         } else {
@@ -91,6 +93,24 @@ public class Aspect {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    //getUserSubscribers /Subcriptions/ Friends ByUserId
+    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.getUser*(..))")
+    public Object aroundFriendsAndSubsServiceUserByIdMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+
+        List<Object> args =  Arrays.stream(proceedingJoinPoint.getArgs()).toList();
+        //id всегда первый в аргументах
+        Long id = (Long)args.get(0);
+        if(userService.existsById(id)) {
+            return proceedingJoinPoint.proceed();
+        } else {
+            return  new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                    String.format("Попытка получения списка sub/friends/subscriptions несуществующего юзера с id %d ",
+                            id)),
+                    HttpStatus.NOT_FOUND);
+        }
+
+    }
+
 
 
 }
