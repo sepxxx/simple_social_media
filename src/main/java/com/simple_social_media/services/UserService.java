@@ -48,6 +48,8 @@ public class UserService implements UserDetailsService {
     }
     public Boolean existsById(Long id) {return userRepository.existsById(id);}
 
+    public User saveUserByEntity(User user) {return userRepository.save(user);}
+
 
     @Override
     @Transactional
