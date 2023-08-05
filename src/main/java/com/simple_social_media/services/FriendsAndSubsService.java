@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -58,18 +59,24 @@ public class FriendsAndSubsService {
         if(optionalTargetUser.isPresent()) {
             User targetUser = optionalTargetUser.get();
 
-            if(targetUser.getSubscribers().contains(sourceUser)){//если source user уже подписан на target_user
-                return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
-                        String.format("Юзер с id %d уже подписан на id %d", sourceUser.getId(),
-                                targetUserId)),
-                        HttpStatus.BAD_REQUEST);
-            } else {
-                sourceUser.addSubscriptionToUser(targetUser);
-                targetUser.addSubscriberToUser(sourceUser);
+
+            if(!Objects.equals(sourceUser.getId(), targetUserId)) {
+                if (targetUser.getSubscribers().contains(sourceUser)) {//если source user уже подписан на target_user
+                    return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                            String.format("Юзер с id %d уже подписан на id %d", sourceUser.getId(),
+                                    targetUserId)),
+                            HttpStatus.BAD_REQUEST);
+                } else {
+                    sourceUser.addSubscriptionToUser(targetUser);
+                    targetUser.addSubscriberToUser(sourceUser);
 //            userRepository.save(targetUser); достаточно сохранить одного юзера
-                userRepository.save(sourceUser);
-                return ResponseEntity.ok(String.format("Юзер с id %d теперь подписан на id %d", sourceUser.getId(),
-                        targetUserId));
+                    userRepository.save(sourceUser);
+                    return ResponseEntity.ok(String.format("Юзер с id %d теперь подписан на id %d", sourceUser.getId(),
+                            targetUserId));
+                }
+            } else {
+                return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),"Нельзя подписаться на себя") ,
+                        HttpStatus.BAD_REQUEST);
             }
 
         } else {
