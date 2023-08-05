@@ -94,9 +94,10 @@ public class Aspect {
         }
     }
     //getUserSubscribers /Subcriptions/ Friends ByUserId
-    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.getUser*(..))")
+//    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.getUser*(..))")
+    //getUserSubscribers/Subcriptions/FriendsByUserId + subscribe/unsubcribeByUserId
+    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.*(Long))")
     public Object aroundFriendsAndSubsServiceUserByIdMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-
         List<Object> args =  Arrays.stream(proceedingJoinPoint.getArgs()).toList();
         //id всегда первый в аргументах
         Long id = (Long)args.get(0);
@@ -104,7 +105,7 @@ public class Aspect {
             return proceedingJoinPoint.proceed();
         } else {
             return  new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    String.format("Попытка получения списка sub/friends/subscriptions несуществующего юзера с id %d ",
+                    String.format("TargetUser с id %d не существует",
                             id)),
                     HttpStatus.NOT_FOUND);
         }

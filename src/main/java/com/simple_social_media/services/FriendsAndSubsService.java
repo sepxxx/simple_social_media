@@ -46,75 +46,74 @@ public class FriendsAndSubsService {
         return subscribers;
     }
 
+    //В 5 методах ниже нельзя применить метод userService getUserById, тк возвращается dto
+    //будем использовать findById
+    //так же проводится проверка существования юзера в advice
+    public ResponseEntity<?> getUserSubscribersByUserId(Long targetUserId) {
+        User targetUser = userService.findById(targetUserId).get();
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                targetUser.getSubscribers()
+        ));
 
+    }
+    public ResponseEntity<?> getUserSubscriptionsByUserId(Long targetUserId) {
+        User targetUser = userService.findById(targetUserId).get();
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                targetUser.getSubscriptions()
+        ));
+    }
+    public ResponseEntity<?> getUserFriendsByUserId(Long targetUserId) {
+        User targetUser = userService.findById(targetUserId).get();
+        return ResponseEntity.ok(converterListUserToUserResponse(
+                makeUserFriendsList(targetUser)
+        ));
+
+    }
     public ResponseEntity<?> subscribeByUserId(Long targetUserId) {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //здесь не нужно проверять optional,тк перед попаданием в контекст
-        //source юзера ищут в базе
+        //не нужно проверять optional,перед попаданием в контекст source ищут в базе
         User sourceUser = userService.findByUsername(contextUserName).get();
-        //а вот targetUser нужно проверить, тк такого id может не быть
-        //здесь нельзя применить метод userService getUserById, тк возвращается dto
-        //будем использовать findById
-        Optional<User> optionalTargetUser = userService.findById(targetUserId);
-        if(optionalTargetUser.isPresent()) {
-            User targetUser = optionalTargetUser.get();
-
-
-            if(!Objects.equals(sourceUser.getId(), targetUserId)) {
-                if (targetUser.getSubscribers().contains(sourceUser)) {//если source user уже подписан на target_user
-                    return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
-                            String.format("Юзер с id %d уже подписан на id %d", sourceUser.getId(),
-                                    targetUserId)),
-                            HttpStatus.BAD_REQUEST);
-                } else {
-                    sourceUser.addSubscriptionToUser(targetUser);
-                    targetUser.addSubscriberToUser(sourceUser);
-//            userRepository.save(targetUser); достаточно сохранить одного юзера
-                    userRepository.save(sourceUser);
-                    return ResponseEntity.ok(String.format("Юзер с id %d теперь подписан на id %d", sourceUser.getId(),
-                            targetUserId));
-                }
-            } else {
-                return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),"Нельзя подписаться на себя") ,
-                        HttpStatus.BAD_REQUEST);
-            }
-
-        } else {
-            return new ResponseEntity<>(String.format("Попытка подписаться на/подружиться с несуществующим юзером id %d ",
-                    targetUserId), HttpStatus.NOT_FOUND);
-        }
-
-    }
-
-    public ResponseEntity<?> unsubscribeByUserId(Long targetUserId) {
-        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User sourceUser = userService.findByUsername(contextUserName).get();
-        Optional<User> optionalTargetUser = userService.findById(targetUserId);
-        if(optionalTargetUser.isPresent()) {
-            User targetUser = optionalTargetUser.get();
-            //cначала проверим подписан ли вообще
-            if(targetUser.getSubscribers().contains(sourceUser)) {
-                    targetUser.getSubscribers().remove(sourceUser);
-                    sourceUser.getSubscriptions().remove(targetUser);
-                    userRepository.save(sourceUser);//достаточно сохранить одного, но убрать нужно у обоих.
-
-                return ResponseEntity.ok(String.format("Юзер с id %d теперь не подписан на id %d", sourceUser.getId(),
-                        targetUserId));
-            } else {
+        User targetUser = userService.findById(targetUserId).get();
+        if(!Objects.equals(sourceUser.getId(), targetUserId)) {
+            if (targetUser.getSubscribers().contains(sourceUser)) {//если source user уже подписан на target_user
                 return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
-                        String.format("Нет подписки на юзера с id %d ",
+                        String.format("Юзер с id %d уже подписан на id %d", sourceUser.getId(),
                                 targetUserId)),
                         HttpStatus.BAD_REQUEST);
+            } else {
+                sourceUser.addSubscriptionToUser(targetUser);
+                targetUser.addSubscriberToUser(sourceUser);
+//            userRepository.save(targetUser); достаточно сохранить одного юзера
+                userRepository.save(sourceUser);
+                return ResponseEntity.ok(String.format("Юзер с id %d теперь подписан на id %d", sourceUser.getId(),
+                        targetUserId));
             }
-
         } else {
-            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
-                    String.format("Попытка отписаться от несуществующего юзера с id %d ",
-                            targetUserId)),
-                    HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),"Нельзя подписаться на себя") ,
+                    HttpStatus.BAD_REQUEST);
         }
-    }
 
+    }
+    public ResponseEntity<?> unsubscribeByUserId(Long targetUserId) {
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //не нужно проверять optional,перед попаданием в контекст source ищут в базе
+        User sourceUser = userService.findByUsername(contextUserName).get();
+        User targetUser = userService.findById(targetUserId).get();
+        //cначала проверим подписан ли вообще
+        if(targetUser.getSubscribers().contains(sourceUser)) {
+                targetUser.getSubscribers().remove(sourceUser);
+                sourceUser.getSubscriptions().remove(targetUser);
+                userRepository.save(sourceUser);//достаточно сохранить одного, но убрать нужно у обоих.
+            return ResponseEntity.ok(String.format("Юзер с id %d теперь не подписан на id %d", sourceUser.getId(),
+                    targetUserId));
+        } else {
+            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
+                    String.format("Нет подписки на юзера с id %d ",
+                            targetUserId)),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+    }
     public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User sourceUser = userService.findByUsername(contextUserName).get();
@@ -154,33 +153,7 @@ public class FriendsAndSubsService {
 
 
 
-    //В 3х методах ниже нельзя применить метод userService getUserById, тк возвращается dto
-    //будем использовать findById
-    //так же проводится проверка существования юзера в advice
-    public ResponseEntity<?> getUserSubscribersByUserId(Long targetUserId) {
-        User targetUser = userService.findById(targetUserId).get();
-        return ResponseEntity.ok(converterListUserToUserResponse(
-                targetUser.getSubscribers()
-        ));
 
-    }
-
-
-    public ResponseEntity<?> getUserSubscriptionsByUserId(Long targetUserId) {
-        User targetUser = userService.findById(targetUserId).get();
-        return ResponseEntity.ok(converterListUserToUserResponse(
-                targetUser.getSubscriptions()
-        ));
-    }
-
-
-    public ResponseEntity<?> getUserFriendsByUserId(Long targetUserId) {
-        User targetUser = userService.findById(targetUserId).get();
-            return ResponseEntity.ok(converterListUserToUserResponse(
-                    makeUserFriendsList(targetUser)
-            ));
-
-    }
 
 
 
