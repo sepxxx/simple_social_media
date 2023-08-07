@@ -6,6 +6,7 @@ import com.simple_social_media.dtos.responses.MessageResponse;
 import com.simple_social_media.entities.Conversation;
 import com.simple_social_media.entities.Message;
 import com.simple_social_media.entities.User;
+import com.simple_social_media.exceptions.AppError;
 import com.simple_social_media.repositories.ConversationRepository;
 import com.simple_social_media.repositories.MessageRepository;
 import lombok.AllArgsConstructor;
@@ -44,72 +45,95 @@ public class ConversationService {
 
     private final FriendsAndSubsService friendsAndSubsService;
 
-    public ResponseEntity<?> createConversation(Long targetUserId) {
-        //необходима проверка на существование targetUserId
-        // + проверка контекста
-        // + проверка не существует ли уже такой беседы
-        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userService.findByUsername(contextUserName).get();
-        List<User> friends =  friendsAndSubsService.makeUserFriendsList(user);
-        User targetUser = userService.findById(targetUserId).get();
-
-        if(friends.contains(targetUser)) {//проверка на дружбу
-
-//          таким образом создается 2 диалога
-//            user.getConversations().add(conversation);
-//            targetUser.getConversations().add(conversation);
-//            userService.saveUserByEntity(user);
-            Conversation conversation = new Conversation(String.format("conv:%d:%d",user.getId(), targetUserId));
-            conversation.addUserToConversation(user);
-            conversation.addUserToConversation(targetUser);
-            conversationRepository.save(conversation);
-
-            return ResponseEntity.ok(String.format("создан диалог с id %d", targetUserId));
-        } else {
-            return new ResponseEntity<>(String.format("вы не друзья с id %d", targetUserId), HttpStatus.FORBIDDEN);
-        }
-    }
 
     public ResponseEntity<?> getCurrentUserConversations() {
-        //необходима проверка на существование targetUserId
         // + проверка контекста
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.findByUsername(contextUserName).get();
-        List<ConversationResponse> conversationResponses = user.getConversations().stream().map(c->
+
+        List<ConversationResponse> conversationResponses = user.getConversations().stream().map(c ->
                 new ConversationResponse(c.getId(), c.getHeader())).toList();
         return ResponseEntity.ok(conversationResponses);
     }
 
-    public ResponseEntity<?> getCurrentUserConversationMessages(Long id) {
-//        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        User user = userService.findByUsername(contextUserName).get();
-        //здесь нужна проверка что сообщения запрашивает один из основателей диалога
+    public ResponseEntity<?> getConversationMessagesById(Long id) {
 
-        List<Message> messageList = messageRepository.findAllByConversationId(id);
-        List<MessageResponse> messageResponseList = messageList.stream().map(m->new MessageResponse(m.getId(),
-                m.getConversationId(),m.getAuthor_id(), m.getText(), m.getDate())).toList();
-        return ResponseEntity.ok(messageResponseList);
-    }
-
-    public ResponseEntity<?> sendMessageToUser(MessageRequest messageRequest) {
-        //если переписка есть,(значит есть 2 записи в conversations_users - id: currentUserId, id:targetUserId);
-        //если нет создадим новую
-        // добавим сообщение туда
+        // + проверка контекста
 
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.findByUsername(contextUserName).get();
-        User targetUser = userService.findById(messageRequest.getTargetUserId()).get();
+        //здесь нужна проверка что сообщения запрашивает один из основателей диалога
+        Optional<Conversation> conversationOptional = conversationRepository.findById(id);
 
-        Optional<Conversation> optionalConversation = conversationRepository.findByUsers(user, targetUser);
-        if(!optionalConversation.isPresent()) {
-            Conversation conversation = new Conversation(String.format("conv:%d:%d",user.getId(), messageRequest.getTargetUserId()));
-            conversation.addUserToConversation(user);
-            conversation.addUserToConversation(targetUser);
-            conversationRepository.save(conversation);
+        if (conversationOptional.isPresent()) {//проверка на существование
+            Conversation conversation = conversationOptional.get();
+            if (conversation.getUsersList().contains(user)) {//проверка на права доступа
+//        List<Message> messageList = messageRepository.findAllByConversationId(id);
+                List<Message> messageList = conversation.getMessageList();
+                List<MessageResponse> messageResponseList = messageList.stream().map(m -> new MessageResponse(m.getId(),
+                        m.getConversationId(), m.getAuthor_id(), m.getText(), m.getDate())).toList();
+
+                return ResponseEntity.ok(messageResponseList);
+            } else {
+                return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
+                        "диалог запрашивает не владелец"),
+                        HttpStatus.FORBIDDEN);
+            }
+
+        } else {
+            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                    String.format("диалога с id %d не существует", id)),
+                    HttpStatus.NOT_FOUND);
         }
-        Conversation conversation = optionalConversation.get();
-        Message message = new Message(conversation.getId(), user.getId(), messageRequest.getText(), new Date());
-        conversation.getMessageList().add(message);
-        return ResponseEntity.ok("OK");
+    }
+
+    public ResponseEntity<?> sendMessageToUser(MessageRequest messageRequest) {
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByUsername(contextUserName).get();
+
+
+        //+ проверка существования targetUser, можно добавить метод в advice
+        Optional<User> targetUserOptional = userService.findById(messageRequest.getTargetUserId());
+        if (targetUserOptional.isPresent()) {
+//        User targetUser = userService.findById(messageRequest.getTargetUserId()).get();
+            User targetUser = targetUserOptional.get();
+            Optional<Conversation> optionalConversation = conversationRepository.findByUsers(user, targetUser);
+            if (optionalConversation.isEmpty()) {//если у пользователей нет диалога
+                if (friendsAndSubsService.makeUserFriendsList(user).contains(targetUser)) {//проверка на дружбу
+                    //этот код должен выполниться когда не было диалога и он создался,
+                    //но после создания диалога нужно брать не из optional, а обращаться к созданному объекту
+                    Conversation conversation = new Conversation(String.format("conv:%d:%d", user.getId(), messageRequest.getTargetUserId()));
+                    conversation.addUserToConversation(user);
+                    conversation.addUserToConversation(targetUser);
+                    //сначала нужно сохранить, чтобы получить id от бд
+                    conversation = conversationRepository.save(conversation);
+
+                    Message message = new Message(conversation.getId(), user.getId(), messageRequest.getText(), new Date());
+                    conversation.addMessageToConversation(message);
+                    conversationRepository.save(conversation);
+                    return ResponseEntity.ok(String.format("сообщение отправлено user id: %d", targetUser.getId()));
+                } else {
+                    return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
+                            "создание диалога запрашивает не друг"),
+                            HttpStatus.FORBIDDEN);
+                }
+            } else {
+
+                //когда был диалог
+
+                Conversation conversation = optionalConversation.get();
+
+                Message message = new Message(conversation.getId(), user.getId(), messageRequest.getText(), new Date());
+                conversation.addMessageToConversation(message);
+                conversationRepository.save(conversation);
+                return ResponseEntity.ok(String.format("сообщение отправлено user id: %d", targetUser.getId()));
+            }
+        } else {
+            return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
+                    String.format("user с id %d не существует", messageRequest.getTargetUserId())),
+                    HttpStatus.NOT_FOUND);
+        }
+
+
     }
 }

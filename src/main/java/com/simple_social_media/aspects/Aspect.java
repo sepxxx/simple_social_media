@@ -89,7 +89,7 @@ public class Aspect {
             //стоит обработать ошибку по authentication
             //но непонятно как на данном этапе она может быть пустой
             return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "securityContext.getAuthentication()=null, невозможно установить владельца поста"),
+                    "securityContext.getAuthentication()=null"),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

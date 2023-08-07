@@ -36,6 +36,12 @@ public class Conversation {
         }
         usersList.add(user);
     }
+    public void addMessageToConversation(Message message) {
+        if(messageList==null){
+            messageList = new ArrayList<>();
+        }
+        messageList.add(message);
+    }
 
     public Conversation() {
 

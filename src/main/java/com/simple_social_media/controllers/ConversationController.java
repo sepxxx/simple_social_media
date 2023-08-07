@@ -12,14 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class ConversationController {
     private final ConversationService conversationService;
 
-    @PostMapping("with/{targetUserId}")
-    public ResponseEntity<?> createConversation(@PathVariable Long targetUserId) {return conversationService.createConversation(targetUserId);}
-
     @GetMapping("")
     public ResponseEntity<?> getCurrentUserConversations() {return conversationService.getCurrentUserConversations();}
 
     @GetMapping("{id}/messages")
-    public ResponseEntity<?> getCurrentUserConversationMessages(@PathVariable Long id) {return conversationService.getCurrentUserConversationMessages(id);}
+    public ResponseEntity<?> getCurrentUserConversationMessages(@PathVariable Long id) {return conversationService.getConversationMessagesById(id);}
 
     @PostMapping("messages/send")
     public ResponseEntity<?> sendMessageToUser(@RequestBody MessageRequest messageRequest) {
