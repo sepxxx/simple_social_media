@@ -50,32 +50,30 @@ public class User {
     inverseJoinColumns = @JoinColumn(name="role_id"))
     private Collection<Role> roles;
 
-    @OneToMany(mappedBy = "user1")
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name="conversations_users",
+    joinColumns = @JoinColumn(name="user_id"),
+    inverseJoinColumns = @JoinColumn(name="conversation_id"))
     private List<Conversation> conversations;
 
     public void addSubscriberToUser(User user) {
-        if(subscribers==null) {
+        if(subscribers==null)
             subscribers = new ArrayList<>();
-        } else {
-            subscribers.add(user);
-        }
+        subscribers.add(user);
     }
 
     public void addSubscriptionToUser(User user) {
-        if(subscriptions==null) {
+        if(subscriptions==null)
             subscriptions = new ArrayList<>();
-        }else {
-            subscriptions.add(user);
-        }
+        subscriptions.add(user);
      }
 
 
     public void addPostToUser(Post post) {
-        if(posts==null) {
+        if(posts==null)
             posts = new ArrayList<>();
-        } else {
-            posts.add(post);
-        }
+        posts.add(post);
+
     }
     public User(String name, String mail, String password) {
         this.name = name;

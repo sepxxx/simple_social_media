@@ -4,6 +4,7 @@ package com.simple_social_media.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,23 +16,32 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
     private Long id;
-//    @Column(name="uid1")
-//    private Long uid1;
-//    @Column(name="uid2")
-//    private Long uid2;
-
-    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
-    private List<Message> messageList;
+    @Column(name="header")
+    private String header;
 
 
-    @ManyToOne
-    @JoinColumn(name="uid1")
-    private User user1;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="conversation_id")//таким образом hibernate не будет создавать JoinTable, а
+    private List<Message> messageList; //организует связь через ссылочное поле в message
 
-    @ManyToOne
-    @JoinColumn(name="uid2")
-    private User user2;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name="conversations_users",
+            joinColumns = @JoinColumn(name="conversation_id"),
+            inverseJoinColumns = @JoinColumn(name="user_id"))
+    private List<User> usersList;
+
+    public void addUserToConversation(User user) {
+        if(usersList==null){
+            usersList = new ArrayList<>();
+        }
+        usersList.add(user);
+    }
+
     public Conversation() {
 
+    }
+
+    public Conversation(String header) {
+        this.header = header;
     }
 }

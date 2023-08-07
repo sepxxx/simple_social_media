@@ -8,7 +8,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class ConversationResponse {
     private Long conversationId;
-    private Long uid1;
-    private Long uid2;
+    private String header;
 
 }
