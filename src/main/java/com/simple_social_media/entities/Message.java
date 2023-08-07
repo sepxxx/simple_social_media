@@ -2,6 +2,7 @@ package com.simple_social_media.entities;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Date;
 @Entity
 @Table(name="messages")
 @Data
+
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +24,15 @@ public class Message {
     private String text;
     @Column(name="date")
     private Date date;
+
+    public Message() {
+
+    }
+
+    public Message(Long conversationId, Long author_id, String text, Date date) {
+        this.conversationId = conversationId;
+        this.author_id = author_id;
+        this.text = text;
+        this.date = date;
+    }
 }

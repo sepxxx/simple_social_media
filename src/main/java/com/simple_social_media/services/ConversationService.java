@@ -1,9 +1,13 @@
 package com.simple_social_media.services;
 
+import com.simple_social_media.dtos.requests.MessageRequest;
 import com.simple_social_media.dtos.responses.ConversationResponse;
+import com.simple_social_media.dtos.responses.MessageResponse;
 import com.simple_social_media.entities.Conversation;
+import com.simple_social_media.entities.Message;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.repositories.ConversationRepository;
+import com.simple_social_media.repositories.MessageRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +38,8 @@ public class ConversationService {
 
     //юзеру будет необходимо получать все свои беседы
     private final ConversationRepository conversationRepository;
+
+    private final MessageRepository messageRepository;
     private final UserService userService;
 
     private final FriendsAndSubsService friendsAndSubsService;
@@ -46,12 +54,12 @@ public class ConversationService {
         User targetUser = userService.findById(targetUserId).get();
 
         if(friends.contains(targetUser)) {//проверка на дружбу
-            Conversation conversation = new Conversation(String.format("conv:%d:%d",user.getId(), targetUserId));
+
 //          таким образом создается 2 диалога
 //            user.getConversations().add(conversation);
 //            targetUser.getConversations().add(conversation);
 //            userService.saveUserByEntity(user);
-
+            Conversation conversation = new Conversation(String.format("conv:%d:%d",user.getId(), targetUserId));
             conversation.addUserToConversation(user);
             conversation.addUserToConversation(targetUser);
             conversationRepository.save(conversation);
@@ -72,4 +80,36 @@ public class ConversationService {
         return ResponseEntity.ok(conversationResponses);
     }
 
+    public ResponseEntity<?> getCurrentUserConversationMessages(Long id) {
+//        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        User user = userService.findByUsername(contextUserName).get();
+        //здесь нужна проверка что сообщения запрашивает один из основателей диалога
+
+        List<Message> messageList = messageRepository.findAllByConversationId(id);
+        List<MessageResponse> messageResponseList = messageList.stream().map(m->new MessageResponse(m.getId(),
+                m.getConversationId(),m.getAuthor_id(), m.getText(), m.getDate())).toList();
+        return ResponseEntity.ok(messageResponseList);
+    }
+
+    public ResponseEntity<?> sendMessageToUser(MessageRequest messageRequest) {
+        //если переписка есть,(значит есть 2 записи в conversations_users - id: currentUserId, id:targetUserId);
+        //если нет создадим новую
+        // добавим сообщение туда
+
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByUsername(contextUserName).get();
+        User targetUser = userService.findById(messageRequest.getTargetUserId()).get();
+
+        Optional<Conversation> optionalConversation = conversationRepository.findByUsers(user, targetUser);
+        if(!optionalConversation.isPresent()) {
+            Conversation conversation = new Conversation(String.format("conv:%d:%d",user.getId(), messageRequest.getTargetUserId()));
+            conversation.addUserToConversation(user);
+            conversation.addUserToConversation(targetUser);
+            conversationRepository.save(conversation);
+        }
+        Conversation conversation = optionalConversation.get();
+        Message message = new Message(conversation.getId(), user.getId(), messageRequest.getText(), new Date());
+        conversation.getMessageList().add(message);
+        return ResponseEntity.ok("OK");
+    }
 }

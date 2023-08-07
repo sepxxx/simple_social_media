@@ -1,5 +1,6 @@
 package com.simple_social_media.controllers;
 
+import com.simple_social_media.dtos.requests.MessageRequest;
 import com.simple_social_media.services.ConversationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,4 +17,12 @@ public class ConversationController {
 
     @GetMapping("")
     public ResponseEntity<?> getCurrentUserConversations() {return conversationService.getCurrentUserConversations();}
+
+    @GetMapping("{id}/messages")
+    public ResponseEntity<?> getCurrentUserConversationMessages(@PathVariable Long id) {return conversationService.getCurrentUserConversationMessages(id);}
+
+    @PostMapping("messages/send")
+    public ResponseEntity<?> sendMessageToUser(@RequestBody MessageRequest messageRequest) {
+        return conversationService.sendMessageToUser(messageRequest);
+    }
 }
