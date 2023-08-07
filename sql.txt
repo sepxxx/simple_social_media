@@ -28,7 +28,7 @@ create table post(
                      header varchar(30),
                      text text,
                      image_url varchar(30),
-                     date date,
+                     date timestamp,
                      PRIMARY KEY(id)
 );
 create table user_post(

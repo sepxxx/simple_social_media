@@ -57,29 +57,23 @@ public class ConversationService {
     }
 
     public ResponseEntity<?> getConversationMessagesById(Long id) {
-
         // + проверка контекста
-
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.findByUsername(contextUserName).get();
         //здесь нужна проверка что сообщения запрашивает один из основателей диалога
         Optional<Conversation> conversationOptional = conversationRepository.findById(id);
-
         if (conversationOptional.isPresent()) {//проверка на существование
             Conversation conversation = conversationOptional.get();
             if (conversation.getUsersList().contains(user)) {//проверка на права доступа
-//        List<Message> messageList = messageRepository.findAllByConversationId(id);
                 List<Message> messageList = conversation.getMessageList();
                 List<MessageResponse> messageResponseList = messageList.stream().map(m -> new MessageResponse(m.getId(),
                         m.getConversationId(), m.getAuthor_id(), m.getText(), m.getDate())).toList();
-
                 return ResponseEntity.ok(messageResponseList);
             } else {
                 return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
                         "диалог запрашивает не владелец"),
                         HttpStatus.FORBIDDEN);
             }
-
         } else {
             return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
                     String.format("диалога с id %d не существует", id)),
@@ -88,10 +82,10 @@ public class ConversationService {
     }
 
     public ResponseEntity<?> sendMessageToUser(MessageRequest messageRequest) {
+
+       //+проверка контекста
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.findByUsername(contextUserName).get();
-
-
         //+ проверка существования targetUser, можно добавить метод в advice
         Optional<User> targetUserOptional = userService.findById(messageRequest.getTargetUserId());
         if (targetUserOptional.isPresent()) {
@@ -118,11 +112,8 @@ public class ConversationService {
                             HttpStatus.FORBIDDEN);
                 }
             } else {
-
                 //когда был диалог
-
                 Conversation conversation = optionalConversation.get();
-
                 Message message = new Message(conversation.getId(), user.getId(), messageRequest.getText(), new Date());
                 conversation.addMessageToConversation(message);
                 conversationRepository.save(conversation);

@@ -33,30 +33,5 @@ public class UserController {
     public ResponseEntity<?> getAllUserPostsByUserId(@PathVariable Long id) {
         return userService.getAllUserPostsByUserId(id);
     }
-//
-//    @PutMapping("")
-//    public User updateUser(@RequestBody User user) {
-//        userService.saveUser(user);
-//        return user;
-//    }
-
-
-
-
-    //USERPROFILE
-
-
-
-//
-//    /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
-//    @GetMapping("/users/{id}/subscriptions")
-//    public List<User> getAllUserSubscriptions(@PathVariable Long id) {
-//        return userService.getAllUserSubscriptions(id);
-//    }
-//    @GetMapping("/users/{id}/subscribers")
-//    public List<User> getAllUserSubscribers(@PathVariable Long id) {
-//        return userService.getAllUserSubscribes(id);
-//    }
-//    /////////////////////////////////////SUBSCRIPTIONS/SUBSCRIBERS/FRIENDS
 
 }
