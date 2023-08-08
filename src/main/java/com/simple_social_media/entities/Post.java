@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name="post")
+@Table(name="posts")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class Post {
 
 
     @ManyToOne
-    @JoinTable(name = "user_post",
+    @JoinTable(name = "users_posts",
             joinColumns = @JoinColumn(name="post_id"),
             inverseJoinColumns = @JoinColumn(name="user_id"))
     private User user;

@@ -23,13 +23,13 @@ public class User {
     private String password;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "user_post",
+    @JoinTable(name = "users_posts",
             joinColumns = @JoinColumn(name="user_id"),
             inverseJoinColumns = @JoinColumn(name="post_id"))
     private List<Post> posts;
 
-    @ManyToMany
-    @JoinTable(name="subscribes",
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name="subscriptions",
             joinColumns=@JoinColumn(name="source_id"),
             inverseJoinColumns=@JoinColumn(name="target_id")
     )
@@ -40,11 +40,11 @@ public class User {
 //            joinColumns=@JoinColumn(name="target_id"),
 //            inverseJoinColumns=@JoinColumn(name="source_id")
 //    )
-    @ManyToMany(mappedBy="subscriptions")
+    @ManyToMany(mappedBy="subscriptions", cascade = CascadeType.ALL)
     private List<User> subscribers;
 
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "users_roles",
     joinColumns = @JoinColumn(name="user_id"),
     inverseJoinColumns = @JoinColumn(name="role_id"))
