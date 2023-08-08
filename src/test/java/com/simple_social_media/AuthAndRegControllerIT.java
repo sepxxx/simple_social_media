@@ -1,8 +1,12 @@
 package com.simple_social_media;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simple_social_media.dtos.requests.UserRegistrationRequest;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.repositories.UserRepository;
+import com.simple_social_media.services.UserService;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,9 @@ public class AuthAndRegControllerIT {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -56,4 +63,76 @@ public class AuthAndRegControllerIT {
                 .andExpect(jsonPath("$.email",
                         is(user.getEmail())));
     }
+
+    @Test
+    public void givenSameUsernames_whenCreateUser_thenReturnBadRequest() throws Exception {
+        // given - precondition or setup
+        User user1 = new User("tttt", "tttt", "tttt");
+        User user2 = new User("tttt", "xxx", "xxx");
+        userRepository.save(user1);
+
+        // when - action or behaviour that we are going test
+        ResultActions response = mockMvc.perform(post("/reg")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user2)));
+
+        // then - verify the result or output using assert statements
+        response.andDo(print()).
+                andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void givenSameUserEmails_whenCreateUser_thenReturnBadRequest() throws Exception {
+        // given - precondition or setup
+        User user1 = new User("xxx", "tttt", "tttt");
+        User user2 = new User("tttt", "tttt", "xxx");
+        userRepository.save(user1);
+
+        // when - action or behaviour that we are going test
+        ResultActions response = mockMvc.perform(post("/reg")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user2)));
+
+        // then - verify the result or output using assert statements
+        response.andDo(print()).
+                andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void givenValidUser_whenCreateAuthToken_thenReturnOk() throws Exception {
+        // given - precondition or setup
+
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        userService.saveUser(urr);
+        JSONObject obj = new JSONObject();
+        obj.put("username", urr.getUsername());
+        obj.put("password", urr.getPassword());
+        // when - action or behaviour that we are going test
+
+        ResultActions response = mockMvc.perform(post("/auth")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(obj.toString()));
+        // then - verify the result or output using assert statements
+        response.andDo(print()).
+                andExpect(status().isOk());
+    }
+
+    @Test
+    public void givenInvalidUser_whenCreateAuthToken_thenReturnBadRequest() throws Exception {
+        // given - precondition or setup
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        userService.saveUser(urr);
+        JSONObject obj = new JSONObject();
+        obj.put("username", "xxx");
+        obj.put("password", "ttt");
+        // when - action or behaviour that we are going test
+        ResultActions response = mockMvc.perform(post("/auth")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(obj.toString()));
+        // then - verify the result or output using assert statements
+        response.andDo(print()).
+                andExpect(status().isBadRequest());
+    }
+
+
 }
