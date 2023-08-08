@@ -33,4 +33,5 @@ public class AuthMethodForTests {
         String jwt = jwtResponse.getToken();
         return "Bearer " + jwt;
     }
+
 }

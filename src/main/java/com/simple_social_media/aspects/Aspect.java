@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,11 +94,18 @@ public class Aspect {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    //getUserSubscribers /Subcriptions/ Friends ByUserId
-//    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.getUser*(..))")
+
+
+
     //getUserSubscribers/Subcriptions/FriendsByUserId + subscribe/unsubcribeByUserId
-    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.*(Long))")
-    public Object aroundFriendsAndSubsServiceUserByIdMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+    @Pointcut("execution(* com.simple_social_media.services.FriendsAndSubsService.*(Long))")
+    public void friendsAndSubsServiceUserByIdMethods(){}
+
+    @Pointcut("execution(* com.simple_social_media.services.FriendsAndSubsService.*(Long))")
+    public void friendsAndSubsServiceUserByIdMethods(){}
+
+    @Around("friendsAndSubsServiceUserByIdMethods()")
+    public Object aroundUserByIdMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         List<Object> args =  Arrays.stream(proceedingJoinPoint.getArgs()).toList();
         //id всегда первый в аргументах
         Long id = (Long)args.get(0);

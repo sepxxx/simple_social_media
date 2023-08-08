@@ -61,6 +61,7 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> getAllUsers() {
+        //C:проводится проверка контекста
         //нужно отмаппить лист юзеров к листу UserResponse(id,email,name)
         //те по факту отбрасываем доп данные юзера
         SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -79,6 +80,8 @@ public class UserService implements UserDetailsService {
 
 
     public ResponseEntity<?> getUserById(Long id) {
+        //C:проводится проверка существования юзера
+
         Optional<User> optional = userRepository.findById(id);
         if (optional.isPresent()) {
             User user = optional.get();
@@ -90,6 +93,9 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> deleteUserById(Long id) {
+        //C:проводится проверка контекста
+        //проверка существования юзера
+
         SecurityContext securityContext = SecurityContextHolder.getContext();
         if(null != securityContext.getAuthentication()){
             String contextUserName = (String) securityContext.getAuthentication().getPrincipal();
@@ -125,9 +131,10 @@ public class UserService implements UserDetailsService {
 
 
     public ResponseEntity<?> getAllUserPostsByUserId(Long id) {
+
+        //C:проводится проверка существования юзера
         //здесь нет смысла использовать методы  existsByName
         //и getUserById тк затем придется обращаться к полю Posts юзера
-
         Optional<User> optional = userRepository.findById(id);
         if (optional.isPresent()) {
             User user = optional.get();
