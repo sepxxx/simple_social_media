@@ -45,6 +45,8 @@ public class User {
 
 
 //    @ManyToMany(cascade = CascadeType.ALL)
+    //F: если оставлю каскад, то не только jointable будет чиститься, но и roles
+    //в текущем случае я не могу использовать метод addRoleToUser, а могу лишь сеттить список
     @ManyToMany
     @JoinTable(name = "users_roles",
     joinColumns = @JoinColumn(name="user_id"),
@@ -68,6 +70,12 @@ public class User {
             subscriptions = new ArrayList<>();
         subscriptions.add(user);
      }
+
+    public void addRoleToUser(Role role) {
+        if(roles==null)
+            roles = new ArrayList<>();
+        roles.add(role);
+    }
 
 
     public void addPostToUser(Post post) {

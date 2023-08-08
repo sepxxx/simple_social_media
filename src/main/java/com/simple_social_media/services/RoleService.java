@@ -13,4 +13,9 @@ public class RoleService {
         //F: возвращается optional и хорошо бы обработать
         return roleRepository.findByName("ROLE_USER").get();
     }
+
+    public Role getAdminRole() {
+        //F: возвращается optional и хорошо бы обработать
+        return roleRepository.findByName("ROLE_ADMIN").get();
+    }
 }

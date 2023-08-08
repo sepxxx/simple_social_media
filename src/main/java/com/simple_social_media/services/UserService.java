@@ -63,9 +63,18 @@ public class UserService implements UserDetailsService {
     public ResponseEntity<?> getAllUsers() {
         //нужно отмаппить лист юзеров к листу UserResponse(id,email,name)
         //те по факту отбрасываем доп данные юзера
-        List<User> users = userRepository.findAll();
-        List<UserResponse> userResponses = users.stream().map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail())).toList();
-        return ResponseEntity.ok(userResponses);
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        String contextUserName = (String) securityContext.getAuthentication().getPrincipal();
+        User user = userRepository.findByUsername(contextUserName).get();
+        if(user.getRoles().contains(roleService.getAdminRole())) {
+            List<User> users = userRepository.findAll();
+            List<UserResponse> userResponses = users.stream().map(u -> new UserResponse(u.getId(), u.getUsername(), u.getEmail())).toList();
+            return ResponseEntity.ok(userResponses);
+        } else {
+            return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
+                    "запрашивает не администратор"),
+                    HttpStatus.FORBIDDEN);
+        }
     }
 
 
