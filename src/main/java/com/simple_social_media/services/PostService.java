@@ -46,7 +46,7 @@ public class PostService {
             post.setUser(dbUser);
             Post postWithId =  postRepository.save(post);
             return new ResponseEntity<>(new PostResponse(postWithId.getId(), postWithId.getHeader(),
-                    postWithId.getText(), postWithId.getDate(), postWithId.getUser().getName(),
+                    postWithId.getText(), postWithId.getDate(), postWithId.getUser().getUsername(),
                     postWithId.getImage_url()), HttpStatus.CREATED);
         }
         //стоит обработать ошибку по authentication
@@ -62,7 +62,7 @@ public class PostService {
         if(optional.isPresent()) {
             Post post = optional.get();
             return ResponseEntity.ok(new PostResponse(post.getId(), post.getHeader(),
-                    post.getText(), post.getDate(), post.getUser().getName(),
+                    post.getText(), post.getDate(), post.getUser().getUsername(),
                     post.getImage_url()));
         } else {
             return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
@@ -99,7 +99,7 @@ public class PostService {
 
                 Post post = optional.get();
 
-                if(contextUserName.equals(post.getUser().getName())) {//если в контексте и посте юзеры одинаковы
+                if(contextUserName.equals(post.getUser().getUsername())) {//если в контексте и посте юзеры одинаковы
                     post.setText(pR.getText());
                     post.setHeader(pR.getHeader());
                     post.setDate(new Date());
@@ -107,7 +107,7 @@ public class PostService {
                     //id и user'a менять не нужно
                     postRepository.save(post);
                     return ResponseEntity.ok(new PostResponse(post.getId(), post.getHeader(),
-                            post.getText(), post.getDate(), post.getUser().getName(),
+                            post.getText(), post.getDate(), post.getUser().getUsername(),
                             post.getImage_url()));
                 } else {
                     return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),

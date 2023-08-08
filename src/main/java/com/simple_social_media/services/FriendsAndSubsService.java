@@ -35,7 +35,7 @@ public class FriendsAndSubsService {
 
     public List<UserResponse> converterListUserToUserResponse(List<User> listToOperate) {
         return listToOperate.stream().map(sub->
-                new UserResponse(sub.getId(), sub.getName(), sub.getMail())).toList();
+                new UserResponse(sub.getId(), sub.getUsername(), sub.getEmail())).toList();
     }
 
     public List<User> makeUserFriendsList(User user) {

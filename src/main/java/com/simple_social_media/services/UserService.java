@@ -30,57 +30,33 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    //F:здесь лучше инжектить сервис для ролей
-    private final RoleRepository roleRepository;
 
+    private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByName(username);
+        return userRepository.findByUsername(username);
     }
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
-
-
     public Boolean existsByName(String username){
-        return userRepository.existsByName(username);
+        return userRepository.existsByUsername(username);
+    }
+    public Boolean existsByMail(String mail) {
+        return userRepository.existsByEmail(mail);
     }
     public Boolean existsById(Long id) {return userRepository.existsById(id);}
 
     public User saveUserByEntity(User user) {return userRepository.save(user);}
 
-
-    @Override
-    @Transactional
-    //:F не знаю точно нужно ли transactional, в туторе так
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        //найти юзера
-        //затем преобразовать к виду, который понимает spring
-        //те к UserDetails предоставляющему необходимую информацию для построения объекта Authentication
-        User user = findByUsername(username).
-                orElseThrow(()->new UsernameNotFoundException(String.
-                        format("Пользователь %s не найден",username)));
-
-        return new CustomUser (
-                user.getName(),
-                user.getPassword(),
-                //нужно получить роли и отмаппить к виду нужному Spring
-                //GrantedAuthority отражает разрешения выданные пользователю в масштабе всего приложения
-                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()),
-                user.getId()
-        );
-    }
-
-
+//    public void deleteAllUsers() { userRepository.deleteAll();}
     public User saveUser(UserRegistrationRequest userRegistrationRequest) {
         User user = new User();
-        user.setMail(userRegistrationRequest.getEmail());
+        user.setEmail(userRegistrationRequest.getEmail());
         user.setPassword(passwordEncoder.encode(userRegistrationRequest.getPassword()));
-        user.setName(userRegistrationRequest.getUsername());
-
-        //F: возвращается optional и хорошо бы обработать
-        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").get()));
+        user.setUsername(userRegistrationRequest.getUsername());
+        user.setRoles(List.of(roleService.getUserRole()));
         return userRepository.save(user);
     }
 
@@ -88,7 +64,7 @@ public class UserService implements UserDetailsService {
         //нужно отмаппить лист юзеров к листу UserResponse(id,email,name)
         //те по факту отбрасываем доп данные юзера
         List<User> users = userRepository.findAll();
-        List<UserResponse> userResponses = users.stream().map(user -> new UserResponse(user.getId(), user.getName(), user.getMail())).toList();
+        List<UserResponse> userResponses = users.stream().map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail())).toList();
         return ResponseEntity.ok(userResponses);
     }
 
@@ -97,7 +73,7 @@ public class UserService implements UserDetailsService {
         Optional<User> optional = userRepository.findById(id);
         if (optional.isPresent()) {
             User user = optional.get();
-            return ResponseEntity.ok(new UserResponse(user.getId(), user.getName(), user.getMail()));
+            return ResponseEntity.ok(new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
         }
         else {
             return new ResponseEntity<>(String.format("нет юзера с id %d ", id), HttpStatus.NOT_FOUND);
@@ -149,7 +125,7 @@ public class UserService implements UserDetailsService {
             //отмаппим список постов к списку PostResponse
             List<Post> postsList = user.getPosts();
             List<PostResponse> postResponseList = postsList.stream().map(p -> new PostResponse(p.getId(),
-                    p.getHeader(),p.getText(),p.getDate(),p.getUser().getName(),p.getImage_url())).toList();
+                    p.getHeader(),p.getText(),p.getDate(),p.getUser().getUsername(),p.getImage_url())).toList();
             return ResponseEntity.ok(postResponseList);
         }
         else {
@@ -160,5 +136,25 @@ public class UserService implements UserDetailsService {
 
 
 
+    @Override
+    @Transactional
+    //:F не знаю точно нужно ли transactional, в туторе так
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        //найти юзера
+        //затем преобразовать к виду, который понимает spring
+        //те к UserDetails предоставляющему необходимую информацию для построения объекта Authentication
+        User user = findByUsername(username).
+                orElseThrow(()->new UsernameNotFoundException(String.
+                        format("Пользователь %s не найден",username)));
+
+        return new CustomUser (
+                user.getUsername(),
+                user.getPassword(),
+                //нужно получить роли и отмаппить к виду нужному Spring
+                //GrantedAuthority отражает разрешения выданные пользователю в масштабе всего приложения
+                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()),
+                user.getId()
+        );
+    }
 
 }

@@ -13,13 +13,13 @@ import lombok.Data;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
+    @Column(name="id")
     private Long id;
-    @Column
-    private String name;
-    @Column
-    private String mail;
-    @Column
+    @Column(name="name")
+    private String username;
+    @Column(name="mail")
+    private String email;
+    @Column(name="password")
     private String password;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -76,8 +76,8 @@ public class User {
 
     }
     public User(String name, String mail, String password) {
-        this.name = name;
-        this.mail = mail;
+        this.username = name;
+        this.email = mail;
         this.password = password;
     }
 

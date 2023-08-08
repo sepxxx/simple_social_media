@@ -1,9 +1,9 @@
-drop table subscribes;
-drop table user_post;
+drop table subscriptions;
+drop table users_posts;
 drop table messages;
-drop table conversations;
 drop table conversations_users;
-drop table post;
+drop table conversations;
+drop table posts;
 drop table users_roles;
 drop table users;
 drop table roles;
@@ -15,7 +15,7 @@ create table users(
                       PRIMARY KEY(id)
 );
 
-create table subscribes(
+create table subscriptions(
                            source_id bigint not null,
                            target_id bigint not null,
                            PRIMARY KEY(source_id, target_id),
@@ -23,7 +23,7 @@ create table subscribes(
                            FOREIGN KEY(target_id) REFERENCES  users (id) ON DELETE CASCADE
 );
 
-create table post(
+create table posts(
                      id BIGSERIAL,
                      header varchar(30),
                      text text,
@@ -31,11 +31,11 @@ create table post(
                      date timestamp,
                      PRIMARY KEY(id)
 );
-create table user_post(
+create table users_posts(
                           user_id bigint not null,
                           post_id bigint not null,
                           FOREIGN KEY(user_id) REFERENCES  users(id) ON DELETE CASCADE,
-                          FOREIGN KEY(post_id) REFERENCES  post (id) ON DELETE CASCADE,
+                          FOREIGN KEY(post_id) REFERENCES  posts (id) ON DELETE CASCADE,
                           PRIMARY KEY(user_id, post_id)
 );
 create table conversations(
@@ -74,8 +74,8 @@ create table users_roles(
                             user_id bigint not null,
                             role_id int not null,
                             primary key (user_id, role_id),
-                            foreign key(user_id) references users(id),
-                            foreign key (role_id) references roles(id)
+                            foreign key(user_id) references users(id) ON DELETE CASCADE,
+                            foreign key (role_id) references roles(id) ON DELETE CASCADE
 );
 
 insert into roles(name)

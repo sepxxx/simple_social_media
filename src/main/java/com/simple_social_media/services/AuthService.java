@@ -45,10 +45,11 @@ public class AuthService {
 
     public ResponseEntity<?> createNewUser(UserRegistrationRequest userRegistrationRequest) {
 
-        if (userService.existsByName(userRegistrationRequest.getUsername())) {
+        if (userService.existsByName(userRegistrationRequest.getUsername()))
             return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), "Пользователь с указанным именем уже существует"), HttpStatus.BAD_REQUEST);
-        }
+        if(userService.existsByMail(userRegistrationRequest.getEmail()))
+            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), "Пользователь с указанным mail уже существует"), HttpStatus.BAD_REQUEST);
         User user = userService.saveUser(userRegistrationRequest);
-        return ResponseEntity.ok(new UserResponse(user.getId(), user.getName(), user.getMail()));
+        return ResponseEntity.ok(new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
     }
 }
