@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -80,9 +81,15 @@ public class Aspect {
 
 
 
+    @Pointcut("execution(* com.simple_social_media.services.FriendsAndSubsService.getCurrentUser*(..))")
+    public void friendsAndSubsServiceCurrentUserMethodsPointcut() {}
+    @Pointcut("execution(* com.simple_social_media.services.UserService.getAllUsers(..))")
+    public void userServiceGetAllUsersPointcut() {}
+    @Pointcut("execution(* com.simple_social_media.services.UserService.deleteUserById(..))")
+    public void userServiceDeleteUserByIdPointcut() {}
 
-
-    @Around("execution(* com.simple_social_media.services.FriendsAndSubsService.getCurrentUser*(..))")
+    @Around("friendsAndSubsServiceCurrentUserMethodsPointcut() || userServiceGetAllUsersPointcut()" +
+            " || userServiceDeleteUserByIdPointcut()")
     public Object aroundFriendsAndSubsServiceCurrentUserMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
         if(null !=  SecurityContextHolder.getContext().getAuthentication()){
             return proceedingJoinPoint.proceed();
@@ -99,12 +106,9 @@ public class Aspect {
 
     //getUserSubscribers/Subcriptions/FriendsByUserId + subscribe/unsubcribeByUserId
     @Pointcut("execution(* com.simple_social_media.services.FriendsAndSubsService.*(Long))")
-    public void friendsAndSubsServiceUserByIdMethods(){}
+    public void friendsAndSubsServiceUserByIdMethodsPointcut(){}
 
-    @Pointcut("execution(* com.simple_social_media.services.FriendsAndSubsService.*(Long))")
-    public void friendsAndSubsServiceUserByIdMethods(){}
-
-    @Around("friendsAndSubsServiceUserByIdMethods()")
+    @Around("friendsAndSubsServiceUserByIdMethodsPointcut()")
     public Object aroundUserByIdMethodsAdvice(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         List<Object> args =  Arrays.stream(proceedingJoinPoint.getArgs()).toList();
         //id всегда первый в аргументах

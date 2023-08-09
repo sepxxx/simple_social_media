@@ -64,8 +64,7 @@ public class UserService implements UserDetailsService {
         //C:проводится проверка контекста
         //нужно отмаппить лист юзеров к листу UserResponse(id,email,name)
         //те по факту отбрасываем доп данные юзера
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        String contextUserName = (String) securityContext.getAuthentication().getPrincipal();
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByUsername(contextUserName).get();
         if(user.getRoles().contains(roleService.getAdminRole())) {
             List<User> users = userRepository.findAll();
@@ -81,7 +80,6 @@ public class UserService implements UserDetailsService {
 
     public ResponseEntity<?> getUserById(Long id) {
         //C:проводится проверка существования юзера
-
         Optional<User> optional = userRepository.findById(id);
         if (optional.isPresent()) {
             User user = optional.get();
@@ -95,37 +93,25 @@ public class UserService implements UserDetailsService {
     public ResponseEntity<?> deleteUserById(Long id) {
         //C:проводится проверка контекста
         //проверка существования юзера
-
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        if(null != securityContext.getAuthentication()){
-            String contextUserName = (String) securityContext.getAuthentication().getPrincipal();
-            //получаем юзера по id чтобы сверить ники
-            //нужно переиспользовать метод из сервиса, чтобы не дублировать код
-            //но не знаю можно ли вообще так писать, тк возвращается ResponseEntity
-            ResponseEntity<?> responseEntity = getUserById(id);
-            if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли юзера можно попробовать удалить
-                UserResponse userResponse = (UserResponse) responseEntity.getBody();
-                if(userResponse.getUsername().equals(contextUserName))//если ники контекста и того кого хотим удалить совпадают
-                {
-                    userRepository.deleteById(id);
-                    return ResponseEntity.ok(String.format("пользователь с id %d был удален", id));
-                } else {
-                    return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
-                            "удаление запрашивает не сам пользователь"),
-                            HttpStatus.FORBIDDEN);
-                }
-
+        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //получаем юзера по id чтобы сверить ники
+        //нужно переиспользовать метод из сервиса, чтобы не дублировать код
+        //но не знаю можно ли вообще так писать, тк возвращается ResponseEntity
+        ResponseEntity<?> responseEntity = getUserById(id);
+        if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли юзера можно попробовать удалить
+            UserResponse userResponse = (UserResponse) responseEntity.getBody();
+            if(userResponse.getUsername().equals(contextUserName))//если ники контекста и того кого хотим удалить совпадают
+            {
+                userRepository.deleteById(id);
+                return ResponseEntity.ok(String.format("пользователь с id %d был удален", id));
             } else {
-                return responseEntity;//иначе возвращаем что такого юзера нет
+                return new ResponseEntity<>(new AppError(HttpStatus.FORBIDDEN.value(),
+                        "удаление запрашивает не сам пользователь"),
+                        HttpStatus.FORBIDDEN);
             }
 
-
         } else {
-            //стоит обработать ошибку по authentication
-            //но непонятно как на данном этапе она может быть пустой
-            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "securityContext.getAuthentication()=null, невозможно установить владельца поста"),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return responseEntity;//иначе возвращаем что такого юзера нет
         }
     }
 
@@ -143,8 +129,7 @@ public class UserService implements UserDetailsService {
             List<PostResponse> postResponseList = postsList.stream().map(p -> new PostResponse(p.getId(),
                     p.getHeader(),p.getText(),p.getDate(),p.getUser().getUsername(),p.getImage_url())).toList();
             return ResponseEntity.ok(postResponseList);
-        }
-        else {
+        } else {
             return new ResponseEntity<>(String.format("нет юзера с id %d ", id), HttpStatus.NOT_FOUND);
         }
 
