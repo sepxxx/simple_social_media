@@ -24,16 +24,15 @@ public class PostController {
 
     @PostMapping("new")
     public ResponseEntity<?> savePost(@RequestBody PostRequest pR) {
-        return postService.savePost(new Post(pR.getHeader(),pR.getText(), pR.getImage_url()));
-    }
+        return postService.saveCurrentUserPost(pR);}
 
     @DeleteMapping("{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id) {
-       return postService.deletePost(id);
+       return postService.deleteCurrentUserPost(id);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody PostRequest pR) {
-        return postService.updatePost(id, pR);
+        return postService.updateCurrentUserPost(id, pR);
     }
 }
