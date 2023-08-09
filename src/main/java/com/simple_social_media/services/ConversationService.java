@@ -9,7 +9,6 @@ import com.simple_social_media.entities.User;
 import com.simple_social_media.exceptions.AppError;
 import com.simple_social_media.repositories.ConversationRepository;
 import com.simple_social_media.repositories.MessageRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,17 +39,15 @@ public class ConversationService {
     //юзеру будет необходимо получать все свои беседы
     private final ConversationRepository conversationRepository;
 
-    private final MessageRepository messageRepository;
     private final UserService userService;
 
     private final FriendsAndSubsService friendsAndSubsService;
 
 
     public ResponseEntity<?> getCurrentUserConversations() {
-        // + проверка контекста
+        //C: проверка контекста
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.findByUsername(contextUserName).get();
-
         List<ConversationResponse> conversationResponses = user.getConversations().stream().map(c ->
                 new ConversationResponse(c.getId(), c.getHeader())).toList();
         return ResponseEntity.ok(conversationResponses);

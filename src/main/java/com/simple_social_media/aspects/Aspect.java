@@ -40,7 +40,6 @@ public class Aspect {
     public void userServiceGetAllUsersPointcut() {}
     @Pointcut("execution(* com.simple_social_media.services.UserService.deleteUserById(..))")
     public void userServiceDeleteUserByIdPointcut() {}
-
     @Pointcut("execution(* com.simple_social_media.services.PostService.*Current*(..))")
     public void postServiceCurrentUserMethodsPointcut() {}
 
