@@ -213,4 +213,83 @@ public class PostControllerIT {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("PUT posts/id with valid id BY creator returns postRequestDto")
+    public void givenCreatorOfPostWithValidPostId_whenUpdatePost_thenReturnsPostRequestDto() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx","xxx","xxx");
+        User user = userService.saveUser(urr);
+        Post post = new Post("header", "text", "url");
+        user.setPosts(List.of(post));
+        user = userService.saveUserByEntity(user);
+        Long postId = user.getPosts().get(0).getId();
+
+        PostRequest postRequest = new PostRequest("newheader", "newtext", "newurl");
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put("/posts/{id}", postId)
+                        .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postRequest))
+        );
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.header", is(postRequest.getHeader())))
+                .andExpect(jsonPath("$.text", is(postRequest.getText())))
+                .andExpect(jsonPath("$.imageUrl", is(postRequest.getImage_url())))
+                .andExpect(jsonPath("$.usernameCreatedBy", is(user.getUsername())));
+    }
+
+
+    @Test
+    @DisplayName("PUT posts/id with valid id BY NOT creator returns 403")
+    public void givenNotCreatorOfPostWithValidPostId_whenUpdatePost_thenReturns403() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx","xxx","xxx");
+        User user = userService.saveUser(urr);
+        Post post = new Post("header", "text", "url");
+        user.setPosts(List.of(post));
+        user = userService.saveUserByEntity(user);
+        Long postId = user.getPosts().get(0).getId();
+        PostRequest postRequest = new PostRequest("newheader", "newtext", "newurl");
+
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("yyy","yyy","yyy");
+        userService.saveUser(urr2);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put("/posts/{id}", postId)
+                        .header("Authorization", AuthMethodForTests.getToken(urr2, mockMvc, objectMapper))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postRequest))
+        );
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    @DisplayName("PUT posts/id with invalid id returns 404")
+    public void givenInvalidPostId_whenUpdatePost_thenReturns404() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx","xxx","xxx");
+        User user = userService.saveUser(urr);
+        PostRequest postRequest = new PostRequest("newheader", "newtext", "newurl");
+        //when
+        ResultActions resultActions = mockMvc.perform(
+                put("/posts/{id}", 1234567890)
+                        .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postRequest))
+        );
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isNotFound());
+
+    }
+
+
 }
