@@ -133,6 +133,61 @@ public class UserControllerIT {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("DELETE /users/id invalid id returns 404")
+    public void givenInvalidId_whenDeleteUserById_returns404() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user = userService.saveUser(urr);
+        //when
+        ResultActions response = mockMvc.perform(
+                delete("/users/{id}", 777)
+                        .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper))
+        );
+        //then
+        response.andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("DELETE /users/id valid id request from another id returns 403")
+    public void givenValidIdAnotherUserAuth_whenDeleteUserById_returns403() throws Exception {
+        //given
+        UserRegistrationRequest urr1 = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User userToDelete= userService.saveUser(urr1);
+
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("yyy", "yyy", "yyy");
+        userService.saveUser(urr2);
+
+        //when
+        ResultActions response = mockMvc.perform(
+                delete("/users/{id}", userToDelete.getId())
+                        .header("Authorization", AuthMethodForTests.getToken(urr2, mockMvc, objectMapper))
+        );
+        //then
+        response.andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("DELETE /users/id valid id request from same id returns 200")
+    public void givenValidIdSameUserAuth_whenDeleteUserById_returns200() throws Exception {
+        //given
+        UserRegistrationRequest urr1 = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User userToDelete= userService.saveUser(urr1);
+
+
+        //when
+        ResultActions response = mockMvc.perform(
+                delete("/users/{id}", userToDelete.getId())
+                        .header("Authorization", AuthMethodForTests.getToken(urr1, mockMvc, objectMapper))
+        );
+        //then
+        response.andDo(print())
+                .andExpect(status().isOk());
+    }
+
+
 
 
 

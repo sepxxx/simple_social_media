@@ -84,8 +84,7 @@ public class UserService implements UserDetailsService {
         if (optional.isPresent()) {
             User user = optional.get();
             return ResponseEntity.ok(new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
-        }
-        else {
+        } else {
             return new ResponseEntity<>(String.format("нет юзера с id %d ", id), HttpStatus.NOT_FOUND);
         }
     }
@@ -100,8 +99,7 @@ public class UserService implements UserDetailsService {
         ResponseEntity<?> responseEntity = getUserById(id);
         if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли юзера можно попробовать удалить
             UserResponse userResponse = (UserResponse) responseEntity.getBody();
-            if(userResponse.getUsername().equals(contextUserName))//если ники контекста и того кого хотим удалить совпадают
-            {
+            if(userResponse.getUsername().equals(contextUserName)){//если ники контекста и того кого хотим удалить совпадают
                 userRepository.deleteById(id);
                 return ResponseEntity.ok(String.format("пользователь с id %d был удален", id));
             } else {
@@ -109,7 +107,6 @@ public class UserService implements UserDetailsService {
                         "удаление запрашивает не сам пользователь"),
                         HttpStatus.FORBIDDEN);
             }
-
         } else {
             return responseEntity;//иначе возвращаем что такого юзера нет
         }
