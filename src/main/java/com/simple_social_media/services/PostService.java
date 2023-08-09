@@ -44,10 +44,10 @@ public class PostService {
 
     public ResponseEntity<?> deleteCurrentUserPost(Long id) {
         //C: проводится проверка контекста
-        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User contextUser = userService.findByUsername(contextUserName).get();
         ResponseEntity<?> responseEntity = getPost(id);
         if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли пост, можно попробовать удалить/изменить
+            String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User contextUser = userService.findByUsername(contextUserName).get();
             PostResponse postResponse = (PostResponse)responseEntity.getBody();
             if (contextUserName.equals(postResponse.getUsernameCreatedBy()) ||
                     contextUser.getRoles().contains(roleService.getAdminRole())) {
