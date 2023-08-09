@@ -113,7 +113,7 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public ResponseEntity<?> getAllUserPostsByUserId(Long id) {
+    public ResponseEntity<?> getUserPostsByUserId(Long id) {
 
         //C:проводится проверка существования юзера
         //здесь нет смысла использовать методы  existsByName

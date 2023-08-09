@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simple_social_media.controllers.UserController;
 import com.simple_social_media.dtos.requests.UserRegistrationRequest;
 import com.simple_social_media.dtos.responses.JwtResponse;
+import com.simple_social_media.entities.Post;
 import com.simple_social_media.entities.User;
 import com.simple_social_media.repositories.UserRepository;
 import com.simple_social_media.services.RoleService;
@@ -187,10 +188,40 @@ public class UserControllerIT {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("GET /users/id/posts invalid id returns 404")
+    public void givenInvalidId_whenGetUserPostsByUserId_returns404() throws Exception {
+        //given
+        UserRegistrationRequest urr1 = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        userService.saveUser(urr1);
+        //when
+        ResultActions response = mockMvc.perform(
+                get("/users/{id}/posts", 777)
+                        .header("Authorization", AuthMethodForTests.getToken(urr1, mockMvc, objectMapper))
+        );
+        //then
+        response.andDo(print())
+                .andExpect(status().isNotFound());
+    }
 
-
-
-
-
+    @Test
+    @DisplayName("GET /users/id/posts valid id returns list od PostDto")
+    public void givenValidId_whenGetUserPostsByUserId_returnsListOfPostDto() throws Exception {
+        //given
+        UserRegistrationRequest urr1 = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user = userService.saveUser(urr1);
+        user.setPosts(List.of(new Post("header1", "text1", "url1"),
+                new Post("header2", "text2", "url2"), new Post("header3", "text3", "url3")));
+        userService.saveUserByEntity(user);
+        //when
+        ResultActions response = mockMvc.perform(
+                get("/users/{id}/posts", user.getId())
+                        .header("Authorization", AuthMethodForTests.getToken(urr1, mockMvc, objectMapper))
+        );
+        //then
+        response.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(3)));
+    }
 
 }

@@ -30,8 +30,8 @@ public class UserController {
     }
 
     @GetMapping("{id}/posts")
-    public ResponseEntity<?> getAllUserPostsByUserId(@PathVariable Long id) {
-        return userService.getAllUserPostsByUserId(id);
+    public ResponseEntity<?> getUserPostsByUserId(@PathVariable Long id) {
+        return userService.getUserPostsByUserId(id);
     }
 
 }
