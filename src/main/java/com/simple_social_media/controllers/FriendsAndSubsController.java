@@ -23,8 +23,8 @@ public class FriendsAndSubsController {
     }
 
     @GetMapping("me/friendRequests")
-    public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
-        return friendsAndSubsService.getCurrentUserActiveFriendRequests();
+    public ResponseEntity<?> getUserFriendRequests() {
+        return friendsAndSubsService.getUserFriendRequests();
     }
 
     @GetMapping("{targetUserId}/subscribers")

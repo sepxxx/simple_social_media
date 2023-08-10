@@ -111,7 +111,7 @@ public class FriendsAndSubsService {
         }
 
     }
-    public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
+    public ResponseEntity<?> getUserFriendRequests() {
         String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User sourceUser = userService.findByUsername(contextUserName).get();
         List<User> subscriptions = sourceUser.getSubscriptions();

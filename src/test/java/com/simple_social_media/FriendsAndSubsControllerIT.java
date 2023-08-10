@@ -235,5 +235,71 @@ public class FriendsAndSubsControllerIT {
     }
 
 
+    @Test
+    @DisplayName("GET /users/me/friendRequests no requests")
+    public void givenNoFR_whenGetUserFriendRequests_thenReturnsListOfUsersDto() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+//        UserRegistrationRequest urr2 = new UserRegistrationRequest("yyy", "yyy", "yyy");
+//        userService.saveUser(urr2);
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/users/me/friendRequests", user1.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(0)));
+    }
+
+    @Test
+    @DisplayName("GET /users/me/friendRequests 2 not mutual subscribers=2friend requests")
+    public void given2FR_whenGetUserFriendRequests_thenReturnsListOfUsersDto() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("yyy", "yyy", "yyy");
+        User user2 = userService.saveUser(urr2);
+        UserRegistrationRequest urr3 = new UserRegistrationRequest("zzz", "zzz", "zzz");
+        User user3 = userService.saveUser(urr3);
+        user2.addSubscriptionToUser(user1);
+        user3.addSubscriptionToUser(user1);
+        userService.saveUserByEntity(user2);
+        userService.saveUserByEntity(user3);
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/users/me/friendRequests", user1.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(2)));
+    }
+
+    @Test
+    @DisplayName("GET /users/me/friendRequests 1 mutual subscriber, 1 not mutual=1friend requests")
+    public void given1FR_whenGetUserFriendRequests_thenReturnsListOfUsersDto() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("yyy", "yyy", "yyy");
+        User user2 = userService.saveUser(urr2);
+        UserRegistrationRequest urr3 = new UserRegistrationRequest("zzz", "zzz", "zzz");
+        User user3 = userService.saveUser(urr3);
+        user1.addSubscriptionToUser(user2);
+        user2.addSubscriptionToUser(user1);
+        user3.addSubscriptionToUser(user1);
+        userService.saveUserByEntity(user1);
+        userService.saveUserByEntity(user2);
+        userService.saveUserByEntity(user3);
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/users/me/friendRequests", user1.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(1)));
+    }
+
+
 
 }
