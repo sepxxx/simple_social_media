@@ -2,7 +2,6 @@ package com.simple_social_media.controllers;
 
 import com.simple_social_media.dtos.responses.PostResponse;
 import com.simple_social_media.dtos.responses.UserResponse;
-import com.simple_social_media.entities.User;
 import com.simple_social_media.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,8 +13,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("users")
@@ -62,9 +59,7 @@ public class UserController {
     @Operation(summary = "Delete user by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User was deleted",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserResponse.class)
-                    ) }),
+                    content = @Content),
             @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthenticated",
