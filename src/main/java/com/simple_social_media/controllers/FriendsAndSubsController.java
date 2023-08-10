@@ -22,24 +22,10 @@ public class FriendsAndSubsController {
             return friendsAndSubsService.unsubscribeByUserId(targetUserId);
     }
 
-    @GetMapping("me/subscriptions")
-    public ResponseEntity<?> getCurrentUserSubscriptions() {
-        return friendsAndSubsService.getCurrentUserSubscriptions();
-    }
     @GetMapping("me/friendRequests")
     public ResponseEntity<?> getCurrentUserActiveFriendRequests() {
         return friendsAndSubsService.getCurrentUserActiveFriendRequests();
     }
-
-    @GetMapping("me/subscribers")
-    public ResponseEntity<?> getCurrentUserSubscribers() {
-        return friendsAndSubsService.getCurrentUserSubscribers();
-    }
-    @GetMapping("me/friends")
-    public ResponseEntity<?> getCurrentUserFriends() {
-        return friendsAndSubsService.getCurrentUserFriends();
-    }
-
 
     @GetMapping("{targetUserId}/subscribers")
     public ResponseEntity<?> getUserSubscribersByUserId(@PathVariable Long targetUserId) {
@@ -55,7 +41,20 @@ public class FriendsAndSubsController {
     }
 
 
-
+//    @GetMapping("me/subscriptions")
+//    public ResponseEntity<?> getCurrentUserSubscriptions() {
+//        return friendsAndSubsService.getCurrentUserSubscriptions();
+//    }
+//    @GetMapping("me/subscribers")
+//    public ResponseEntity<?> getCurrentUserSubscribers() {
+//        return friendsAndSubsService.getCurrentUserSubscribers();
+//    }
+//    @GetMapping("me/friends")
+//    public ResponseEntity<?> getCurrentUserFriends() {
+//        return friendsAndSubsService.getCurrentUserFriends();
+//    }
+//
+//
 
 
 

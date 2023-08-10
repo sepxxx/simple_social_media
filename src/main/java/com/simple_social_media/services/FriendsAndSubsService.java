@@ -28,11 +28,6 @@ public class FriendsAndSubsService {
 //5)проверка списка друзей означает возврат пересечения списков подписок и подписчиков
 //6)удалить из друзей означает отписаться - удалить source_user из подписчиков target_user
     private final UserService userService;
-    //изначально я планировал оставить все в userService, но для разделения логики вынес
-    //подписки и дружбу, но по факту это тот же userService, поэтому приходится обращаться к репозиторию
-    //для сохранения объекта User например
-    private final UserRepository userRepository;
-
     public List<UserResponse> converterListUserToUserResponse(List<User> listToOperate) {
         return listToOperate.stream().map(sub->
                 new UserResponse(sub.getId(), sub.getUsername(), sub.getEmail())).toList();
@@ -84,7 +79,8 @@ public class FriendsAndSubsService {
                 sourceUser.addSubscriptionToUser(targetUser);
                 targetUser.addSubscriberToUser(sourceUser);
 //            userRepository.save(targetUser); достаточно сохранить одного юзера
-                userRepository.save(sourceUser);
+//                userRepository.save(sourceUser);
+                userService.saveUserByEntity(sourceUser);
                 return ResponseEntity.ok(String.format("Юзер с id %d теперь подписан на id %d", sourceUser.getId(),
                         targetUserId));
             }
@@ -103,7 +99,8 @@ public class FriendsAndSubsService {
         if(targetUser.getSubscribers().contains(sourceUser)) {
                 targetUser.getSubscribers().remove(sourceUser);
                 sourceUser.getSubscriptions().remove(targetUser);
-                userRepository.save(sourceUser);//достаточно сохранить одного, но убрать нужно у обоих.
+//                userRepository.save(sourceUser);//достаточно сохранить одного, но убрать нужно у обоих.
+                  userService.saveUserByEntity(sourceUser);
             return ResponseEntity.ok(String.format("Юзер с id %d теперь не подписан на id %d", sourceUser.getId(),
                     targetUserId));
         } else {
@@ -127,29 +124,29 @@ public class FriendsAndSubsService {
     ///cкорее всего не совсем рационально писать отдельный метод для текущего юзера
     //под проверку личных списков
     //N:проверка контекста проводится в адвайсе
-    public ResponseEntity<?> getCurrentUserSubscriptions() {
-        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //не проверять optional,тк перед попаданием в контекст source юзера ищут в базе
-        User sourceUser = userService.findByUsername(contextUserName).get();
-        //нужно отмаппить список юзеров-подписок в список dto userResponse
-        return ResponseEntity.ok(converterListUserToUserResponse(
-                sourceUser.getSubscriptions()));
-
-    }
-
-    public ResponseEntity<?> getCurrentUserSubscribers() {
-        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User sourceUser = userService.findByUsername(contextUserName).get();
-        return ResponseEntity.ok(converterListUserToUserResponse(
-                sourceUser.getSubscribers()));
-    }
-
-    public ResponseEntity<?> getCurrentUserFriends() {
-        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User sourceUser = userService.findByUsername(contextUserName).get();
-        return ResponseEntity.ok(converterListUserToUserResponse(
-                makeUserFriendsList(sourceUser)));
-    }
+//    public ResponseEntity<?> getCurrentUserSubscriptions() {
+//        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        //не проверять optional,тк перед попаданием в контекст source юзера ищут в базе
+//        User sourceUser = userService.findByUsername(contextUserName).get();
+//        //нужно отмаппить список юзеров-подписок в список dto userResponse
+//        return ResponseEntity.ok(converterListUserToUserResponse(
+//                sourceUser.getSubscriptions()));
+//
+//    }
+//
+//    public ResponseEntity<?> getCurrentUserSubscribers() {
+//        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        User sourceUser = userService.findByUsername(contextUserName).get();
+//        return ResponseEntity.ok(converterListUserToUserResponse(
+//                sourceUser.getSubscribers()));
+//    }
+//
+//    public ResponseEntity<?> getCurrentUserFriends() {
+//        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        User sourceUser = userService.findByUsername(contextUserName).get();
+//        return ResponseEntity.ok(converterListUserToUserResponse(
+//                makeUserFriendsList(sourceUser)));
+//    }
 
 
 

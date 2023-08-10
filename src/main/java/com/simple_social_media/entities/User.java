@@ -40,8 +40,15 @@ public class User {
 //            joinColumns=@JoinColumn(name="target_id"),
 //            inverseJoinColumns=@JoinColumn(name="source_id")
 //    )
+    //при таких связях замечено в тестах, что
+    //при сохранении подписок у юзера setSubscribers или же addSubscriberToUser
+    //таблица subscriptions не заполняется
+    //нужно у тех кого хотим добавить в подписчики сформировать подписки и все будет ок
     @ManyToMany(mappedBy="subscriptions", cascade = CascadeType.ALL)
     private List<User> subscribers;
+
+
+
 
 
 //    @ManyToMany(cascade = CascadeType.ALL)
