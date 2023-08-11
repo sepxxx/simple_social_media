@@ -66,8 +66,12 @@ public class ActivityFeedService {
             int indexFrom = (page - 1) * limit;
             int lastInd = postResponseList.size() - 1;//поледний индекс нашего листа
             System.out.println("!!!!! LAST IND " + lastInd);
+
+
             //sublist не трогает последний, значит в прошлом запросе мы его не зацепили
-            if (indexFrom > 0) indexFrom--;
+//            if (indexFrom > 0) indexFrom--;
+
+
             System.out.println("!!!!! INDEX FROM " + indexFrom);
             //определим общее число возможных страниц
             int pagesAmount = postResponseList.size() / limit;
@@ -76,9 +80,11 @@ public class ActivityFeedService {
 
             if (lastInd >= indexFrom + limit - 1){//постов больше чем нужно или =
                 postResponseList = postResponseList.subList(indexFrom, indexFrom + limit);
+                System.out.println("!!!!! SUBLIST SIZE " + postResponseList.size());
                 return ResponseEntity.ok(new ActivityFeedResponse(postResponseList, pagesAmount));
-            } else if (lastInd > indexFrom) {//постов меньше чем нужно, но они есть
-                postResponseList = postResponseList.subList(indexFrom, lastInd);
+            } else if (lastInd >= indexFrom) {//постов меньше чем нужно, но они есть
+                postResponseList = postResponseList.subList(indexFrom, lastInd+1);//+1 тк иначе не захватит
+                System.out.println("!!!!! SUBLIST SIZE " + postResponseList.size());
                 return ResponseEntity.ok(new ActivityFeedResponse(postResponseList, pagesAmount));
             }else {
                 return new ResponseEntity<>("такой страницы нет", HttpStatus.NOT_FOUND);
