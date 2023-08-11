@@ -365,4 +365,52 @@ public class FriendsAndSubsControllerIT {
 
 
 
+    @Test
+    @DisplayName("DELETE /users/{id}/subscribers invalid id returns 404")
+    public void givenInvalidId_whenUnsubscribeById_thenReturns404() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/users/{id}/subscribers", 1234567890)
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("DELETE /users/{id}/subscribers valid id not following returns 400")
+    public void givenValidIdNotFollowing_whenUnsubscribeById_thenReturns400() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("eee", "eee", "eee");
+        User user2 = userService.saveUser(urr2);
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/users/{id}/subscribers", user2.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("DELETE /users/{id}/subscribers valid id following returns 200")
+    public void givenValidIdFollowing_whenUnsubscribeById_thenReturns200() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("eee", "eee", "eee");
+        User user2 = userService.saveUser(urr2);
+        user1.addSubscriptionToUser(user2);
+        userService.saveUserByEntity(user1);
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/users/{id}/subscribers", user2.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isOk());
+    }
+
 }
