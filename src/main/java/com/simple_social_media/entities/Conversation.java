@@ -20,7 +20,7 @@ public class Conversation {
     private String header;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="conversation_id")//таким образом hibernate не будет создавать JoinTable, а
+//    @JoinColumn(name="conversation_id")//таким образом hibernate не будет создавать JoinTable, а
     private List<Message> messageList; //организует связь через ссылочное поле в message
 
 //    @ManyToMany(cascade = CascadeType.ALL)
@@ -29,6 +29,13 @@ public class Conversation {
             joinColumns = @JoinColumn(name="conversation_id"),
             inverseJoinColumns = @JoinColumn(name="user_id"))
     private List<User> usersList;
+
+
+
+//    @PreRemove
+//    private void preRemove() {
+//        setMessageList(null);
+//    }
 
     public void addUserToConversation(User user) {
         if(usersList==null){

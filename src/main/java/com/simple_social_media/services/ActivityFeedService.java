@@ -1,6 +1,7 @@
 package com.simple_social_media.services;
 
 import com.simple_social_media.dtos.requests.ActivityFeedRequest;
+import com.simple_social_media.dtos.responses.ActivityFeedResponse;
 import com.simple_social_media.dtos.responses.PostResponse;
 import com.simple_social_media.entities.Post;
 import com.simple_social_media.entities.User;
@@ -18,8 +19,8 @@ import java.util.List;
 public class ActivityFeedService {
     private final UserService userService;
     private final FriendsAndSubsService friendsAndSubsService;
-    //нужно отобразить последние посты подписок
 
+    //нужно отобразить последние посты подписок
     //получаем подписки юзера
     //у каждой подписки берем посты
     //берем последний
@@ -43,22 +44,51 @@ public class ActivityFeedService {
         if(page>0 &&  limit> 0) {
             String contextUsername = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User contextUser = userService.findByUsername(contextUsername).get();
-            List<User> friends = friendsAndSubsService.makeUserFriendsList(contextUser);
-            List<PostResponse> postResponseList = friends.stream().map((u) -> {
+
+            System.out.println("!!!!! SUBSCRIPTION LIST SIZE " + contextUser.getSubscriptions().size());
+
+
+            List<PostResponse> postResponseList = contextUser.getSubscriptions().stream().map((u) -> {
                 List<Post> posts = u.getPosts();
-                Post lastPost = posts.get(posts.size() - 1);
-                return new PostResponse(lastPost.getId(), lastPost.getHeader(), lastPost.getText(), lastPost.getDate()
-                        , lastPost.getUser().getUsername(), lastPost.getImage_url());
+                //у каждого юзера мы должны получить последний пост
+                if(posts.size()>0) {
+                    Post lastPost = posts.get(posts.size() - 1);
+                    return new PostResponse(lastPost.getId(), lastPost.getHeader(), lastPost.getText(), lastPost.getDate()
+                            , lastPost.getUser().getUsername(), lastPost.getImage_url());
+                } else {
+                    return null;
+                }
             }).toList();
+            System.out.println("!!!!! POSTRESPONSES LIST SIZE NOT SORTED " + postResponseList.size());
+
             postResponseList = postResponseList.stream().sorted(Comparator.comparing(PostResponse::getDate)).toList();
-            //необходимо получить номера постов попадающих в текущую страницу
-            Integer indexFrom = page*limit;
-            //что если постов < 5
-            //что если на последней странице 2 поста например
-            return ResponseEntity.ok(postResponseList.subList(indexFrom, indexFrom+5));
+
+            int indexFrom = (page - 1) * limit;
+            int lastInd = postResponseList.size() - 1;//поледний индекс нашего листа
+            System.out.println("!!!!! LAST IND " + lastInd);
+            //sublist не трогает последний, значит в прошлом запросе мы его не зацепили
+            if (indexFrom > 0) indexFrom--;
+            System.out.println("!!!!! INDEX FROM " + indexFrom);
+            //определим общее число возможных страниц
+            int pagesAmount = postResponseList.size() / limit;
+            if(postResponseList.size() % limit!=0)
+                pagesAmount++;//последняя страница будет неполной
+
+            if (lastInd >= indexFrom + limit - 1){//постов больше чем нужно или =
+                postResponseList = postResponseList.subList(indexFrom, indexFrom + limit);
+                return ResponseEntity.ok(new ActivityFeedResponse(postResponseList, pagesAmount));
+            } else if (lastInd > indexFrom) {//постов меньше чем нужно, но они есть
+                postResponseList = postResponseList.subList(indexFrom, lastInd);
+                return ResponseEntity.ok(new ActivityFeedResponse(postResponseList, pagesAmount));
+            }else {
+                return new ResponseEntity<>("такой страницы нет", HttpStatus.NOT_FOUND);
+            }
         } else {
-            return new ResponseEntity<>("некорректные значения номера страницы " +
-                    "либо максимума постов на страницу", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("limit,page должны быть > 0", HttpStatus.BAD_REQUEST);
         }
     }
+
+
+
+
 }

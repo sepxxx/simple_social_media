@@ -124,4 +124,8 @@ public class ConversationService {
 
 
     }
+
+    public Conversation saveConversationByEntity(Conversation c) {
+        return conversationRepository.save(c);
+    }
 }

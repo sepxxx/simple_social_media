@@ -66,6 +66,15 @@ public class User {
     inverseJoinColumns = @JoinColumn(name="conversation_id"))
     private List<Conversation> conversations;
 
+
+
+    @PreRemove
+    private void preRemove() {
+        for (Conversation conversation : conversations) {
+            conversation.setMessageList(null);
+        }
+    }
+
     public void addSubscriberToUser(User user) {
         if(subscribers==null)
             subscribers = new ArrayList<>();
