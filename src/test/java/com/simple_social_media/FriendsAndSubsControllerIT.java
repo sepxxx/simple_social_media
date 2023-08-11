@@ -300,6 +300,69 @@ public class FriendsAndSubsControllerIT {
                 .andExpect(jsonPath("$.size()", is(1)));
     }
 
+    @Test
+    @DisplayName("POST /users/{id}/subscribers invalid id returns 404")
+    public void givenInvalidId_whenSubscribeById_thenReturns404() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(post("/users/{id}/subscribers", 1234567890)
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("POST /users/{id}/subscribers valid id request by user with same id returns 400")
+    public void givenValidIdSameUser_whenSubscribeById_thenReturns400() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        //when
+        ResultActions resultActions = mockMvc.perform(post("/users/{id}/subscribers", user1.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /users/{id}/subscribers valid id request by user already following returns 400")
+    public void givenValidIdUserAlreadyFollowing_whenSubscribeById_thenReturns400() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("yyy", "yyy", "yyy");
+        User user2 = userService.saveUser(urr2);
+        user1.addSubscriptionToUser(user2);
+        userService.saveUserByEntity(user1);
+        //when
+        ResultActions resultActions = mockMvc.perform(post("/users/{id}/subscribers", user2.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /users/{id}/subscribers valid id request by user not following returns 200")
+    public void givenValidId_whenSubscribeById_thenReturns200() throws Exception {
+        //given
+        UserRegistrationRequest urr = new UserRegistrationRequest("xxx", "xxx", "xxx");
+        User user1 = userService.saveUser(urr);
+        UserRegistrationRequest urr2 = new UserRegistrationRequest("yyy", "yyy", "yyy");
+        User user2 = userService.saveUser(urr2);
+        //when
+        ResultActions resultActions = mockMvc.perform(post("/users/{id}/subscribers", user2.getId())
+                .header("Authorization", AuthMethodForTests.getToken(urr, mockMvc, objectMapper)));
+        //then
+        resultActions.andDo(print())
+                .andExpect(status().isOk());
+    }
+
 
 
 }
