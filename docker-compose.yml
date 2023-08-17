@@ -1,10 +1,7 @@
 version: '3.8'
 services:
   client-backend:
-    image: client
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: sepxxx/simple_social_media
     ports:
       - "8080:8080"
     depends_on:
@@ -13,6 +10,8 @@ services:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
       SPRING_DATASOURCE_URL: jdbc:postgresql://service-db/jeraldin
+#      SPRING_ACTIVE_PROFILE: docker
+      SPRING_PROFILES_ACTIVE: docker
 
 #      - SERVER_PORT= 8181
 
