@@ -14,7 +14,8 @@
     <name>simple_social_media</name>
     <description>simple_social_media</description>
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
+            <start-class>com.SocialMediaApi.SocialMediaApplication</start-class>
     </properties>
     <dependencies>
         <dependency>
@@ -108,21 +109,15 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            </plugin>-->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <mainClass>com.SocialMediaApi.SocialMediaApplication</mainClass>
+                    <layout>JAR</layout>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>none</phase>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
