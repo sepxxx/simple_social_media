@@ -1,0 +1,269 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > UserService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.SocialMediaApi.services</a>
+</div>
+
+<h1>Coverage Summary for Class: UserService (com.SocialMediaApi.services)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserService</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98%
+  </span>
+  <span class="absValue">
+    (49/50)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UserService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    92.9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98%
+  </span>
+  <span class="absValue">
+    (49/50)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.SocialMediaApi.services;
+&nbsp;
+&nbsp;import com.SocialMediaApi.dtos.requests.UserRegistrationRequest;
+&nbsp;import com.SocialMediaApi.dtos.responses.PostResponse;
+&nbsp;import com.SocialMediaApi.dtos.responses.UserResponse;
+&nbsp;import com.SocialMediaApi.entities.Post;
+&nbsp;import com.SocialMediaApi.entities.User;
+&nbsp;import com.SocialMediaApi.exceptions.AppError;
+&nbsp;import com.SocialMediaApi.repositories.UserRepository;
+&nbsp;import com.SocialMediaApi.security.CustomUser;
+&nbsp;import jakarta.transaction.Transactional;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.authority.SimpleGrantedAuthority;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.security.core.userdetails.UserDetails;
+&nbsp;import org.springframework.security.core.userdetails.UserDetailsService;
+&nbsp;import org.springframework.security.core.userdetails.UsernameNotFoundException;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class UserService implements UserDetailsService {
+&nbsp;    private final UserRepository userRepository;
+&nbsp;
+&nbsp;    private final RoleService roleService;
+&nbsp;    private final PasswordEncoder passwordEncoder;
+&nbsp;
+&nbsp;    public Optional&lt;User&gt; findByUsername(String username) {
+<b class="fc">&nbsp;        return userRepository.findByUsername(username);</b>
+&nbsp;    }
+&nbsp;    public Optional&lt;User&gt; findById(Long id) {
+<b class="fc">&nbsp;        return userRepository.findById(id);</b>
+&nbsp;    }
+&nbsp;    public Boolean existsByName(String username){
+<b class="fc">&nbsp;        return userRepository.existsByUsername(username);</b>
+&nbsp;    }
+&nbsp;    public Boolean existsByMail(String mail) {
+<b class="fc">&nbsp;        return userRepository.existsByEmail(mail);</b>
+&nbsp;    }
+<b class="fc">&nbsp;    public Boolean existsById(Long id) {return userRepository.existsById(id);}</b>
+&nbsp;
+<b class="fc">&nbsp;    public User saveUserByEntity(User user) {return userRepository.save(user);}</b>
+&nbsp;
+&nbsp;//    public void deleteAllUsers() { userRepository.deleteAll();}
+&nbsp;    public User saveUser(UserRegistrationRequest userRegistrationRequest) {
+<b class="fc">&nbsp;        User user = new User();</b>
+<b class="fc">&nbsp;        user.setEmail(userRegistrationRequest.getEmail());</b>
+<b class="fc">&nbsp;        user.setPassword(passwordEncoder.encode(userRegistrationRequest.getPassword()));</b>
+<b class="fc">&nbsp;        user.setUsername(userRegistrationRequest.getUsername());</b>
+<b class="fc">&nbsp;        user.setRoles(List.of(roleService.getUserRole()));</b>
+<b class="fc">&nbsp;        return userRepository.save(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getAllUsers() {
+&nbsp;        //C:проводится проверка контекста
+&nbsp;        //нужно отмаппить лист юзеров к листу UserResponse(id,email,name)
+&nbsp;        //те по факту отбрасываем доп данные юзера
+<b class="fc">&nbsp;        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+<b class="fc">&nbsp;        User user = userRepository.findByUsername(contextUserName).get();</b>
+<b class="fc">&nbsp;        if(user.getRoles().contains(roleService.getAdminRole())) {</b>
+<b class="fc">&nbsp;            List&lt;User&gt; users = userRepository.findAll();</b>
+<b class="fc">&nbsp;            List&lt;UserResponse&gt; userResponses = users.stream().map(u -&gt; new UserResponse(u.getId(), u.getUsername(), u.getEmail())).toList();</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(userResponses);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.FORBIDDEN.value(),</b>
+&nbsp;                    &quot;запрашивает не администратор&quot;),
+&nbsp;                    HttpStatus.FORBIDDEN);
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getUserById(Long id) {
+&nbsp;        //C:проводится проверка существования юзера
+<b class="fc">&nbsp;        Optional&lt;User&gt; optional = userRepository.findById(id);</b>
+<b class="fc">&nbsp;        if (optional.isPresent()) {</b>
+<b class="fc">&nbsp;            User user = optional.get();</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(new UserResponse(user.getId(), user.getUsername(), user.getEmail()));</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(String.format(&quot;нет юзера с id %d &quot;, id), HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; deleteUserById(Long id) {
+&nbsp;        //C:проводится проверка контекста
+&nbsp;        //проверка существования юзера
+<b class="fc">&nbsp;        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+&nbsp;        //получаем юзера по id чтобы сверить ники
+&nbsp;        //нужно переиспользовать метод из сервиса, чтобы не дублировать код
+&nbsp;        //но не знаю можно ли вообще так писать, тк возвращается ResponseEntity
+<b class="fc">&nbsp;        ResponseEntity&lt;?&gt; responseEntity = getUserById(id);</b>
+<b class="fc">&nbsp;        if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли юзера можно попробовать удалить</b>
+<b class="fc">&nbsp;            UserResponse userResponse = (UserResponse) responseEntity.getBody();</b>
+<b class="fc">&nbsp;            if(userResponse.getUsername().equals(contextUserName)){//если ники контекста и того кого хотим удалить совпадают</b>
+<b class="fc">&nbsp;                userRepository.deleteById(id);</b>
+<b class="fc">&nbsp;                return ResponseEntity.ok(String.format(&quot;пользователь с id %d был удален&quot;, id));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.FORBIDDEN.value(),</b>
+&nbsp;                        &quot;удаление запрашивает не сам пользователь&quot;),
+&nbsp;                        HttpStatus.FORBIDDEN);
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            return responseEntity;//иначе возвращаем что такого юзера нет</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getUserPostsByUserId(Long id) {
+&nbsp;
+&nbsp;        //C:проводится проверка существования юзера
+&nbsp;        //здесь нет смысла использовать методы  existsByName
+&nbsp;        //и getUserById тк затем придется обращаться к полю Posts юзера
+<b class="fc">&nbsp;        Optional&lt;User&gt; optional = userRepository.findById(id);</b>
+<b class="fc">&nbsp;        if (optional.isPresent()) {</b>
+<b class="fc">&nbsp;            User user = optional.get();</b>
+&nbsp;            //отмаппим список постов к списку PostResponse
+<b class="fc">&nbsp;            List&lt;Post&gt; postsList = user.getPosts();</b>
+<b class="fc">&nbsp;            List&lt;PostResponse&gt; postResponseList = postsList.stream().map(p -&gt; new PostResponse(p.getId(),</b>
+<b class="fc">&nbsp;                    p.getHeader(),p.getText(),p.getDate(),p.getUser().getUsername(),p.getImage_url())).toList();</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(postResponseList);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(String.format(&quot;нет юзера с id %d &quot;, id), HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    @Transactional
+&nbsp;    //:F не знаю точно нужно ли transactional, в туторе так
+&nbsp;    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+&nbsp;        //найти юзера
+&nbsp;        //затем преобразовать к виду, который понимает spring
+&nbsp;        //те к UserDetails предоставляющему необходимую информацию для построения объекта Authentication
+<b class="fc">&nbsp;        User user = findByUsername(username).</b>
+<b class="fc">&nbsp;                orElseThrow(()-&gt;new UsernameNotFoundException(String.</b>
+<b class="nc">&nbsp;                        format(&quot;Пользователь %s не найден&quot;,username)));</b>
+&nbsp;
+<b class="fc">&nbsp;        return new CustomUser (</b>
+<b class="fc">&nbsp;                user.getUsername(),</b>
+<b class="fc">&nbsp;                user.getPassword(),</b>
+&nbsp;                //нужно получить роли и отмаппить к виду нужному Spring
+&nbsp;                //GrantedAuthority отражает разрешения выданные пользователю в масштабе всего приложения
+<b class="fc">&nbsp;                user.getRoles().stream().map(role -&gt; new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()),</b>
+<b class="fc">&nbsp;                user.getId()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-08-18 17:11</div>
+</div>
+</body>
+</html>

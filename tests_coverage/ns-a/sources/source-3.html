@@ -1,0 +1,233 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ConversationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.SocialMediaApi.services</a>
+</div>
+
+<h1>Coverage Summary for Class: ConversationService (com.SocialMediaApi.services)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConversationService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (44/44)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.SocialMediaApi.services;
+&nbsp;
+&nbsp;import com.SocialMediaApi.dtos.requests.MessageRequest;
+&nbsp;import com.SocialMediaApi.dtos.responses.ConversationResponse;
+&nbsp;import com.SocialMediaApi.dtos.responses.MessageResponse;
+&nbsp;import com.SocialMediaApi.entities.Conversation;
+&nbsp;import com.SocialMediaApi.entities.Message;
+&nbsp;import com.SocialMediaApi.entities.User;
+&nbsp;import com.SocialMediaApi.exceptions.AppError;
+&nbsp;import com.SocialMediaApi.repositories.ConversationRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;public class ConversationService {
+&nbsp;    // Друзья могут писать друг другу сообщения
+&nbsp;    // (реализация чата не нужна, пользователи могу запросить переписку с помощью запрос а)
+&nbsp;
+&nbsp;    //1)сообщения принадлежат конкретной беседе
+&nbsp;    //2)для отправки сообщения необходим (текст, id беседы, author_id)
+&nbsp;    //3)любой не может оправить сообщение в беседу, он должен принадлежать ей
+&nbsp;    //4)после отписки дружба пропадает =&gt; нельзя писать сообщения
+&nbsp;    //но удалять беседу нельзя, тк пропадут сообщения,
+&nbsp;    // поэтому перед каждой отправкой сообщения придется проверять дружбу
+&nbsp;
+&nbsp;    //1)для создания беседы необходимы (uid1, uid2)
+&nbsp;    //2)source_id можно взять из контекста
+&nbsp;    //3)создать беседу могут только друзья
+&nbsp;
+&nbsp;    //юзеру будет необходимо получать все свои беседы
+&nbsp;    private final ConversationRepository conversationRepository;
+&nbsp;
+&nbsp;    private final UserService userService;
+&nbsp;
+&nbsp;    private final FriendsAndSubsService friendsAndSubsService;
+&nbsp;
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getCurrentUserConversations() {
+&nbsp;        //C: проверка контекста
+<b class="fc">&nbsp;        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+<b class="fc">&nbsp;        User user = userService.findByUsername(contextUserName).get();</b>
+<b class="fc">&nbsp;        List&lt;ConversationResponse&gt; conversationResponses = user.getConversations().stream().map(c -&gt;</b>
+<b class="fc">&nbsp;                new ConversationResponse(c.getId(), c.getHeader())).toList();</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(conversationResponses);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getConversationMessagesById(Long id) {
+&nbsp;        // + проверка контекста
+<b class="fc">&nbsp;        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+<b class="fc">&nbsp;        User user = userService.findByUsername(contextUserName).get();</b>
+&nbsp;        //здесь нужна проверка что сообщения запрашивает один из основателей диалога
+<b class="fc">&nbsp;        Optional&lt;Conversation&gt; conversationOptional = conversationRepository.findById(id);</b>
+<b class="fc">&nbsp;        if (conversationOptional.isPresent()) {//проверка на существование</b>
+<b class="fc">&nbsp;            Conversation conversation = conversationOptional.get();</b>
+<b class="fc">&nbsp;            if (conversation.getUsersList().contains(user)) {//проверка на права доступа</b>
+<b class="fc">&nbsp;                List&lt;Message&gt; messageList = conversation.getMessageList();</b>
+<b class="fc">&nbsp;                List&lt;MessageResponse&gt; messageResponseList = messageList.stream().map(m -&gt; new MessageResponse(m.getId(),</b>
+<b class="fc">&nbsp;                        m.getConversationId(), m.getAuthor_id(), m.getText(), m.getDate())).toList();</b>
+<b class="fc">&nbsp;                return ResponseEntity.ok(messageResponseList);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.FORBIDDEN.value(),</b>
+&nbsp;                        &quot;диалог запрашивает не владелец&quot;),
+&nbsp;                        HttpStatus.FORBIDDEN);
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.NOT_FOUND.value(),</b>
+<b class="fc">&nbsp;                    String.format(&quot;диалога с id %d не существует&quot;, id)),</b>
+&nbsp;                    HttpStatus.NOT_FOUND);
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; sendMessageToUser(MessageRequest messageRequest) {
+&nbsp;
+&nbsp;       //+проверка контекста
+<b class="fc">&nbsp;        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+<b class="fc">&nbsp;        User user = userService.findByUsername(contextUserName).get();</b>
+&nbsp;        //+ проверка существования targetUser, можно добавить метод в advice
+<b class="fc">&nbsp;        Optional&lt;User&gt; targetUserOptional = userService.findById(messageRequest.getTargetUserId());</b>
+<b class="fc">&nbsp;        if (targetUserOptional.isPresent()) {</b>
+&nbsp;//        User targetUser = userService.findById(messageRequest.getTargetUserId()).get();
+<b class="fc">&nbsp;            User targetUser = targetUserOptional.get();</b>
+<b class="fc">&nbsp;            Optional&lt;Conversation&gt; optionalConversation = conversationRepository.findByUsers(user, targetUser);</b>
+<b class="fc">&nbsp;            if (optionalConversation.isEmpty()) {//если у пользователей нет диалога</b>
+<b class="fc">&nbsp;                if (friendsAndSubsService.makeUserFriendsList(user).contains(targetUser)) {//проверка на дружбу</b>
+&nbsp;                    //этот код должен выполниться когда не было диалога и он создался,
+&nbsp;                    //но после создания диалога нужно брать не из optional, а обращаться к созданному объекту
+<b class="fc">&nbsp;                    Conversation conversation = new Conversation(String.format(&quot;conv:%d:%d&quot;, user.getId(), messageRequest.getTargetUserId()));</b>
+<b class="fc">&nbsp;                    conversation.addUserToConversation(user);</b>
+<b class="fc">&nbsp;                    conversation.addUserToConversation(targetUser);</b>
+&nbsp;                    //сначала нужно сохранить, чтобы получить id от бд
+<b class="fc">&nbsp;                    conversation = conversationRepository.save(conversation);</b>
+&nbsp;
+<b class="fc">&nbsp;                    Message message = new Message(conversation.getId(), user.getId(), messageRequest.getText(), new Date());</b>
+<b class="fc">&nbsp;                    conversation.addMessageToConversation(message);</b>
+<b class="fc">&nbsp;                    conversationRepository.save(conversation);</b>
+<b class="fc">&nbsp;                    return ResponseEntity.ok(String.format(&quot;сообщение отправлено user id: %d&quot;, targetUser.getId()));</b>
+&nbsp;                } else {
+<b class="fc">&nbsp;                    return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.FORBIDDEN.value(),</b>
+&nbsp;                            &quot;создание диалога запрашивает не друг&quot;),
+&nbsp;                            HttpStatus.FORBIDDEN);
+&nbsp;                }
+&nbsp;            } else {
+&nbsp;                //когда был диалог
+<b class="fc">&nbsp;                Conversation conversation = optionalConversation.get();</b>
+<b class="fc">&nbsp;                Message message = new Message(conversation.getId(), user.getId(), messageRequest.getText(), new Date());</b>
+<b class="fc">&nbsp;                conversation.addMessageToConversation(message);</b>
+<b class="fc">&nbsp;                conversationRepository.save(conversation);</b>
+<b class="fc">&nbsp;                return ResponseEntity.ok(String.format(&quot;сообщение отправлено user id: %d&quot;, targetUser.getId()));</b>
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.NOT_FOUND.value(),</b>
+<b class="fc">&nbsp;                    String.format(&quot;user с id %d не существует&quot;, messageRequest.getTargetUserId())),</b>
+&nbsp;                    HttpStatus.NOT_FOUND);
+&nbsp;        }
+&nbsp;
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    public Conversation saveConversationByEntity(Conversation c) {
+<b class="fc">&nbsp;        return conversationRepository.save(c);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-08-18 17:11</div>
+</div>
+</body>
+</html>

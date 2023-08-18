@@ -1,0 +1,186 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FriendsAndSubsController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.SocialMediaApi.controllers</a>
+</div>
+
+<h1>Coverage Summary for Class: FriendsAndSubsController (com.SocialMediaApi.controllers)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FriendsAndSubsController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.SocialMediaApi.controllers;
+&nbsp;
+&nbsp;
+&nbsp;import com.SocialMediaApi.services.FriendsAndSubsService;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.media.Content;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;@RestController
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;@RequestMapping(&quot;users&quot;)
+&nbsp;@SecurityRequirement(name=&quot;bearerAuth&quot;)
+&nbsp;public class FriendsAndSubsController {
+&nbsp;
+&nbsp;    private final FriendsAndSubsService friendsAndSubsService;
+&nbsp;
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Subscribe by id&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Subscription successful&quot;,
+&nbsp;                    content = @Content),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;User was not found&quot;,
+&nbsp;                    content = @Content),
+&nbsp;            @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Unauthenticated&quot;,
+&nbsp;                    content = @Content),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Can&#39;t follow yourself&quot;,
+&nbsp;                    content = @Content),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Already following&quot;,
+&nbsp;                    content = @Content)
+&nbsp;    })
+&nbsp;    @PostMapping(&quot;{targetUserId}/subscribers&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; subscribeByUserId(@PathVariable Long targetUserId) {
+<b class="fc">&nbsp;            return friendsAndSubsService.subscribeByUserId(targetUserId);</b>
+&nbsp;    }
+&nbsp;    @DeleteMapping(&quot;{targetUserId}/subscribers&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; unsubscribeByUserId(@PathVariable Long targetUserId) {
+<b class="fc">&nbsp;            return friendsAndSubsService.unsubscribeByUserId(targetUserId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;me/friendRequests&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; getUserFriendRequests() {
+<b class="fc">&nbsp;        return friendsAndSubsService.getUserFriendRequests();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;{targetUserId}/subscribers&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; getUserSubscribersByUserId(@PathVariable Long targetUserId) {
+<b class="fc">&nbsp;        return friendsAndSubsService.getUserSubscribersByUserId(targetUserId);</b>
+&nbsp;    }
+&nbsp;    @GetMapping(&quot;{targetUserId}/subscriptions&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; getUserSubscriptionsByUserId(@PathVariable Long targetUserId) {
+<b class="fc">&nbsp;        return friendsAndSubsService.getUserSubscriptionsByUserId(targetUserId);</b>
+&nbsp;    }
+&nbsp;    @GetMapping(&quot;{targetUserId}/friends&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; getUserFriendsByUserId(@PathVariable Long targetUserId) {
+<b class="fc">&nbsp;        return friendsAndSubsService.getUserFriendsByUserId(targetUserId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;//    @GetMapping(&quot;me/subscriptions&quot;)
+&nbsp;//    public ResponseEntity&lt;?&gt; getCurrentUserSubscriptions() {
+&nbsp;//        return friendsAndSubsService.getCurrentUserSubscriptions();
+&nbsp;//    }
+&nbsp;//    @GetMapping(&quot;me/subscribers&quot;)
+&nbsp;//    public ResponseEntity&lt;?&gt; getCurrentUserSubscribers() {
+&nbsp;//        return friendsAndSubsService.getCurrentUserSubscribers();
+&nbsp;//    }
+&nbsp;//    @GetMapping(&quot;me/friends&quot;)
+&nbsp;//    public ResponseEntity&lt;?&gt; getCurrentUserFriends() {
+&nbsp;//        return friendsAndSubsService.getCurrentUserFriends();
+&nbsp;//    }
+&nbsp;//
+&nbsp;//
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-08-18 17:11</div>
+</div>
+</body>
+</html>

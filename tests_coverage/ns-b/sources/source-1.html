@@ -1,0 +1,166 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > JwtTokenUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.SocialMediaApi.utils</a>
+</div>
+
+<h1>Coverage Summary for Class: JwtTokenUtils (com.SocialMediaApi.utils)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtTokenUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.5%
+  </span>
+  <span class="absValue">
+    (21/22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.SocialMediaApi.utils;
+&nbsp;
+&nbsp;
+&nbsp;import com.SocialMediaApi.security.CustomUser;
+&nbsp;import io.jsonwebtoken.Claims;
+&nbsp;import io.jsonwebtoken.Jwts;
+&nbsp;import io.jsonwebtoken.SignatureAlgorithm;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.security.core.GrantedAuthority;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.time.Duration;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;@Component
+<b class="fc">&nbsp;public class JwtTokenUtils {</b>
+&nbsp;    @Value(&quot;${jwt.secret}&quot;)
+&nbsp;    private String secret;
+&nbsp;    @Value(&quot;${jwt.lifetime}&quot;)
+&nbsp;    private Duration lifetime;
+&nbsp;
+&nbsp;    public String generateToken(CustomUser customUser) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; claims = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        claims.put(&quot;id&quot;, customUser.getId());</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;String&gt; rolesList = customUser.getAuthorities().stream()</b>
+<b class="fc">&nbsp;                .map(GrantedAuthority::getAuthority).toList();</b>
+<b class="fc">&nbsp;        claims.put(&quot;roles&quot;, rolesList);</b>
+&nbsp;
+<b class="fc">&nbsp;        Date issued = new Date();</b>
+<b class="fc">&nbsp;        Date expired = new Date(issued.getTime() + lifetime.toMillis());</b>
+&nbsp;
+<b class="fc">&nbsp;         return    Jwts.builder()</b>
+<b class="fc">&nbsp;                    .setClaims(claims)</b>
+<b class="fc">&nbsp;                    .setSubject(customUser.getUsername())</b>
+<b class="fc">&nbsp;                    .setExpiration(expired)</b>
+<b class="fc">&nbsp;                    .setIssuedAt(issued)</b>
+<b class="fc">&nbsp;                    .signWith(SignatureAlgorithm.HS256, secret)</b>
+<b class="fc">&nbsp;                    .compact();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    public Claims getAllClaimsFromToken(String token ) {
+<b class="fc">&nbsp;        return Jwts.parser()</b>
+<b class="fc">&nbsp;                .setSigningKey(secret)</b>
+<b class="fc">&nbsp;                .parseClaimsJws(token)</b>
+<b class="fc">&nbsp;                .getBody();</b>
+&nbsp;    }
+&nbsp;    public String getUsername(String token) {
+<b class="fc">&nbsp;        return getAllClaimsFromToken(token).getSubject();</b>
+&nbsp;    }
+&nbsp;    public List&lt;String&gt; getRoles(String token) {
+<b class="fc">&nbsp;        return getAllClaimsFromToken(token).get(&quot;roles&quot;, List.class);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Integer getId(String token) {
+<b class="nc">&nbsp;        return getAllClaimsFromToken(token).get(&quot;id&quot;, Integer.class);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-08-18 17:11</div>
+</div>
+</body>
+</html>

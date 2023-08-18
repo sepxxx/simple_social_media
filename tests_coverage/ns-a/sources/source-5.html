@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PostService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.SocialMediaApi.services</a>
+</div>
+
+<h1>Coverage Summary for Class: PostService (com.SocialMediaApi.services)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PostService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (44/44)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PostService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (44/44)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.SocialMediaApi.services;
+&nbsp;
+&nbsp;
+&nbsp;import com.SocialMediaApi.dtos.requests.PostRequest;
+&nbsp;import com.SocialMediaApi.dtos.responses.PostResponse;
+&nbsp;import com.SocialMediaApi.entities.User;
+&nbsp;import com.SocialMediaApi.exceptions.AppError;
+&nbsp;import com.SocialMediaApi.repositories.PostRepository;
+&nbsp;import com.SocialMediaApi.entities.Post;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@RequiredArgsConstructor</b>
+&nbsp;
+&nbsp;public class PostService {
+&nbsp;
+&nbsp;    private final PostRepository postRepository;
+&nbsp;    private final UserService userService;
+&nbsp;
+&nbsp;    private final RoleService roleService;
+&nbsp;    public ResponseEntity&lt;?&gt; saveCurrentUserPost(PostRequest pR) {
+&nbsp;        //C: проводится проверка контекста
+<b class="fc">&nbsp;        String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+<b class="fc">&nbsp;        User dbUser = userService.findByUsername(contextUserName).get();</b>
+<b class="fc">&nbsp;        Post post = new Post(pR.getHeader(), pR.getText(), pR.getImage_url());</b>
+<b class="fc">&nbsp;        post.setUser(dbUser);</b>
+<b class="fc">&nbsp;        Post postWithId =  postRepository.save(post);</b>
+<b class="fc">&nbsp;        return new ResponseEntity&lt;&gt;(new PostResponse(postWithId.getId(), postWithId.getHeader(),</b>
+<b class="fc">&nbsp;                postWithId.getText(), postWithId.getDate(), postWithId.getUser().getUsername(),</b>
+<b class="fc">&nbsp;                postWithId.getImage_url()), HttpStatus.CREATED);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; deleteCurrentUserPost(Long id) {
+&nbsp;        //C: проводится проверка контекста
+<b class="fc">&nbsp;        ResponseEntity&lt;?&gt; responseEntity = getPost(id);</b>
+<b class="fc">&nbsp;        if(responseEntity.getStatusCode().isSameCodeAs(HttpStatus.OK)) {//если нашли пост, можно попробовать удалить/изменить</b>
+<b class="fc">&nbsp;            String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+<b class="fc">&nbsp;            User contextUser = userService.findByUsername(contextUserName).get();</b>
+<b class="fc">&nbsp;            PostResponse postResponse = (PostResponse)responseEntity.getBody();</b>
+<b class="fc">&nbsp;            if (contextUserName.equals(postResponse.getUsernameCreatedBy()) ||</b>
+<b class="fc">&nbsp;                    contextUser.getRoles().contains(roleService.getAdminRole())) {</b>
+<b class="fc">&nbsp;                postRepository.deleteById(id);</b>
+<b class="fc">&nbsp;                return ResponseEntity.ok(String.format(&quot;пост с id %d удален&quot;, id));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.FORBIDDEN.value(),</b>
+&nbsp;                        &quot;Запрашивает не владелец поста&quot;),
+&nbsp;                        HttpStatus.FORBIDDEN);
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            return responseEntity;//иначе возвращаем что такого поста нет</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    //чтобы обновить пост нужно получить из бд пост по id
+&nbsp;    //затем пересобрать заново
+&nbsp;    //1) если будем использовать getPost из репозитория
+&nbsp;    //для сборки понадобиться вытащить пользователя из бд
+&nbsp;    //чтобы заново связать пост и юзера
+&nbsp;    //2)если повторим немного код getPost, то не придется вытаскивать юзера
+&nbsp;    //из бд, тк получим не dto поста, а сам Post
+&nbsp;    public ResponseEntity&lt;?&gt; updateCurrentUserPost(Long id, PostRequest pR) {
+&nbsp;        //C: проводится проверка контекста
+<b class="fc">&nbsp;        Optional&lt;Post&gt; optional = postRepository.findById(id);</b>
+<b class="fc">&nbsp;        if(optional.isPresent()) {</b>
+<b class="fc">&nbsp;            Post post = optional.get();</b>
+<b class="fc">&nbsp;            String contextUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();</b>
+<b class="fc">&nbsp;            if(contextUserName.equals(post.getUser().getUsername())) {//если в контексте и посте юзеры одинаковы</b>
+<b class="fc">&nbsp;                post.setText(pR.getText());</b>
+<b class="fc">&nbsp;                post.setHeader(pR.getHeader());</b>
+<b class="fc">&nbsp;                post.setDate(new Date());</b>
+<b class="fc">&nbsp;                post.setImage_url(pR.getImage_url());</b>
+&nbsp;                //id и user&#39;a менять не нужно
+<b class="fc">&nbsp;                postRepository.save(post);</b>
+<b class="fc">&nbsp;                return ResponseEntity.ok(new PostResponse(post.getId(), post.getHeader(),</b>
+<b class="fc">&nbsp;                        post.getText(), post.getDate(), post.getUser().getUsername(),</b>
+<b class="fc">&nbsp;                        post.getImage_url()));</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.FORBIDDEN.value(),</b>
+&nbsp;                        &quot;обновление запрашивает не владелец поста&quot;),
+&nbsp;                        HttpStatus.FORBIDDEN);
+&nbsp;            }
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.NOT_FOUND.value(),</b>
+<b class="fc">&nbsp;                    String.format(&quot;пост с id %d не существует&quot;, id)),</b>
+&nbsp;                    HttpStatus.NOT_FOUND);
+&nbsp;        }
+&nbsp;    }
+&nbsp;    public ResponseEntity&lt;?&gt; getPost(Long id) {
+<b class="fc">&nbsp;        Optional&lt;Post&gt; optional = postRepository.findById(id);</b>
+<b class="fc">&nbsp;        if(optional.isPresent()) {</b>
+<b class="fc">&nbsp;            Post post = optional.get();</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(new PostResponse(post.getId(), post.getHeader(),</b>
+<b class="fc">&nbsp;                    post.getText(), post.getDate(), post.getUser().getUsername(),</b>
+<b class="fc">&nbsp;                    post.getImage_url()));</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(new AppError(HttpStatus.NOT_FOUND.value(),</b>
+<b class="fc">&nbsp;                    String.format(&quot;поста с id %d не существует&quot;, id)),</b>
+&nbsp;                    HttpStatus.NOT_FOUND);
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-08-18 17:11</div>
+</div>
+</body>
+</html>

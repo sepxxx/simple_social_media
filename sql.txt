@@ -1,12 +1,15 @@
 drop table subscriptions;
 drop table users_posts;
-drop table messages;
+
 drop table conversations_users;
+drop table conversations_messages;
+drop table messages;
 drop table conversations;
 drop table posts;
 drop table users_roles;
 drop table users;
 drop table roles;
+
 create table users(
                       id BIGSERIAL,
                       name varchar(30) not null unique,
@@ -16,27 +19,27 @@ create table users(
 );
 
 create table subscriptions(
-                           source_id bigint not null,
-                           target_id bigint not null,
-                           PRIMARY KEY(source_id, target_id),
-                           FOREIGN KEY(source_id) REFERENCES  users (id) ON DELETE CASCADE,
-                           FOREIGN KEY(target_id) REFERENCES  users (id) ON DELETE CASCADE
+                              source_id bigint not null,
+                              target_id bigint not null,
+                              PRIMARY KEY(source_id, target_id),
+                              FOREIGN KEY(source_id) REFERENCES  users (id) ON DELETE CASCADE,
+                              FOREIGN KEY(target_id) REFERENCES  users (id) ON DELETE CASCADE
 );
 
 create table posts(
-                     id BIGSERIAL,
-                     header varchar(30),
-                     text text,
-                     image_url varchar(30),
-                     date timestamp,
-                     PRIMARY KEY(id)
+                      id BIGSERIAL,
+                      header varchar(30),
+                      text text,
+                      image_url varchar(30),
+                      date timestamp,
+                      PRIMARY KEY(id)
 );
 create table users_posts(
-                          user_id bigint not null,
-                          post_id bigint not null,
-                          FOREIGN KEY(user_id) REFERENCES  users(id) ON DELETE CASCADE,
-                          FOREIGN KEY(post_id) REFERENCES  posts (id) ON DELETE CASCADE,
-                          PRIMARY KEY(user_id, post_id)
+                            user_id bigint not null,
+                            post_id bigint not null,
+                            FOREIGN KEY(user_id) REFERENCES  users(id) ON DELETE CASCADE,
+                            FOREIGN KEY(post_id) REFERENCES  posts (id) ON DELETE CASCADE,
+                            PRIMARY KEY(user_id, post_id)
 );
 create table conversations(
                               id BIGSERIAL,
@@ -47,21 +50,27 @@ create table conversations(
 create table messages(
                          id BIGSERIAL,
                          conversation_id bigint not null,
-                         author_id bigint not null,
+                         author_id bigint,
                          text text,
                          date timestamp,
                          FOREIGN KEY(conversation_id) REFERENCES  conversations(id) ON DELETE CASCADE,
-                         FOREIGN KEY(author_id) REFERENCES  users(id) ON DELETE CASCADE,
+                         FOREIGN KEY(author_id) REFERENCES  users(id) ON DELETE SET NULL ON UPDATE SET NULL,
                          PRIMARY KEY(id)
 );
-
+create table conversations_messages(
+                        conversation_id bigint not null,
+                        message_id bigint not null,
+                        PRIMARY KEY (conversation_id, message_id),
+                        FOREIGN KEY(conversation_id) REFERENCES  conversations(id) ON DELETE CASCADE,
+                        FOREIGN KEY(message_id) REFERENCES  messages(id) ON DELETE CASCADE
+);
 create table conversations_users(
-    conversation_id bigint not null,
-    user_id bigint not null,
-    PRIMARY KEY (conversation_id, user_id),
-    FOREIGN KEY(conversation_id) REFERENCES  conversations(id) ON DELETE CASCADE,
-    FOREIGN KEY(user_id) REFERENCES  users(id) ON DELETE CASCADE
-    );
+                                    conversation_id bigint not null,
+                                    user_id bigint,
+                                    PRIMARY KEY (conversation_id, user_id),
+                                    FOREIGN KEY(conversation_id) REFERENCES  conversations(id) ON DELETE CASCADE,
+                                    FOREIGN KEY(user_id) REFERENCES  users(id) ON DELETE SET NULL ON UPDATE SET NULL
+);
 
 
 create table roles(
