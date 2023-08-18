@@ -20,8 +20,11 @@ public class Conversation {
     private String header;
 
     @OneToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name="conversation_id")//таким образом hibernate не будет создавать JoinTable, а
-    private List<Message> messageList; //организует связь через ссылочное поле в message
+    @JoinTable(name="conversations_messages",
+            joinColumns=@JoinColumn(name="conversation_id"),
+            inverseJoinColumns=@JoinColumn(name="message_id")
+    )
+    private List<Message> messageList;
 
 //    @ManyToMany(cascade = CascadeType.ALL)
     @ManyToMany

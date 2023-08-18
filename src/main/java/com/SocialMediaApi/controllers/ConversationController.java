@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 public class ConversationController {
     private final ConversationService conversationService;
 
-
-
     @GetMapping("")
     public ResponseEntity<?> getCurrentUserConversations() {return conversationService.getCurrentUserConversations();}
 

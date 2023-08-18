@@ -60,20 +60,14 @@ public class User {
     inverseJoinColumns = @JoinColumn(name="role_id"))
     private Collection<Role> roles;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+//    @ManyToMany(cascade = CascadeType.ALL) если оставлю каскад, переписка будет пропадать у обоих юзеров
+    //нужно сделать так, чтобы зависящие от id таблицы не ругались на удаление юзера
+    @ManyToMany
     @JoinTable(name="conversations_users",
     joinColumns = @JoinColumn(name="user_id"),
     inverseJoinColumns = @JoinColumn(name="conversation_id"))
     private List<Conversation> conversations;
 
-
-
-    @PreRemove
-    private void preRemove() {
-        for (Conversation conversation : conversations) {
-            conversation.setMessageList(null);
-        }
-    }
 
     public void addSubscriberToUser(User user) {
         if(subscribers==null)

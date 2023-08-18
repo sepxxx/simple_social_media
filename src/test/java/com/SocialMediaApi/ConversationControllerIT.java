@@ -43,7 +43,7 @@ public class ConversationControllerIT {
 
     @BeforeEach
     void setup() {
-        userRepository.deleteAll();;
+        userRepository.deleteAll();
     }
 
     @Test
