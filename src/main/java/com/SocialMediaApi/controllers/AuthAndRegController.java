@@ -40,7 +40,7 @@ public class AuthAndRegController {
 
     @Operation(summary = "Authenticate")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful registration",
+            @ApiResponse(responseCode = "200", description = "Successful authentication",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = JwtResponse.class)
                     ) }),
