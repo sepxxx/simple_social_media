@@ -44,10 +44,7 @@ public class ActivityFeedService {
         if(page>0 &&  limit> 0) {
             String contextUsername = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User contextUser = userService.findByUsername(contextUsername).get();
-
-            System.out.println("!!!!! SUBSCRIPTION LIST SIZE " + contextUser.getSubscriptions().size());
-
-
+//            System.out.println("!!!!! SUBSCRIPTION LIST SIZE " + contextUser.getSubscriptions().size());
             List<PostResponse> postResponseList = contextUser.getSubscriptions().stream().map((u) -> {
                 List<Post> posts = u.getPosts();
                 //у каждого юзера мы должны получить последний пост
@@ -59,32 +56,23 @@ public class ActivityFeedService {
                     return null;
                 }
             }).toList();
-            System.out.println("!!!!! POSTRESPONSES LIST SIZE NOT SORTED " + postResponseList.size());
-
+//            System.out.println("!!!!! POSTRESPONSES LIST SIZE NOT SORTED " + postResponseList.size());
             postResponseList = postResponseList.stream().sorted(Comparator.comparing(PostResponse::getDate)).toList();
-
             int indexFrom = (page - 1) * limit;
             int lastInd = postResponseList.size() - 1;//поледний индекс нашего листа
-            System.out.println("!!!!! LAST IND " + lastInd);
-
-
-            //sublist не трогает последний, значит в прошлом запросе мы его не зацепили
-//            if (indexFrom > 0) indexFrom--;
-
-
-            System.out.println("!!!!! INDEX FROM " + indexFrom);
+//            System.out.println("!!!!! LAST IND " + lastInd);
+//            System.out.println("!!!!! INDEX FROM " + indexFrom);
             //определим общее число возможных страниц
             int pagesAmount = postResponseList.size() / limit;
             if(postResponseList.size() % limit!=0)
                 pagesAmount++;//последняя страница будет неполной
-
             if (lastInd >= indexFrom + limit - 1){//постов больше чем нужно или =
                 postResponseList = postResponseList.subList(indexFrom, indexFrom + limit);
-                System.out.println("!!!!! SUBLIST SIZE " + postResponseList.size());
+//                System.out.println("!!!!! SUBLIST SIZE " + postResponseList.size());
                 return ResponseEntity.ok(new ActivityFeedResponse(postResponseList, pagesAmount));
             } else if (lastInd >= indexFrom) {//постов меньше чем нужно, но они есть
                 postResponseList = postResponseList.subList(indexFrom, lastInd+1);//+1 тк иначе не захватит
-                System.out.println("!!!!! SUBLIST SIZE " + postResponseList.size());
+//                System.out.println("!!!!! SUBLIST SIZE " + postResponseList.size());
                 return ResponseEntity.ok(new ActivityFeedResponse(postResponseList, pagesAmount));
             }else {
                 return new ResponseEntity<>("такой страницы нет", HttpStatus.NOT_FOUND);
