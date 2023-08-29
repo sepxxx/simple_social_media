@@ -1,12 +1,10 @@
 FROM maven:3.8.4-openjdk-17 as builder
 WORKDIR /app
-COPY src /app/.
+COPY src/main/. /app/src/main/.
 COPY pom.xml /app/pom.xml
 EXPOSE 8080
 RUN mvn -f /app/pom.xml clean package -Dmaven.test.skip=true
-
-
-#ENTRYPOINT ["java", "-jar", "target/simple_social_media-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "/app/target/SimpleSocialMedia-0.0.1-SNAPSHOT.jar"]
 
 
 #FROM eclipse-temurin:17-jre-alpine
