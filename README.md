@@ -1,5 +1,5 @@
 # Social Media Application
->__Details Web messenger clone__ 
+>__Web messenger clone__ 
 >You can subscribe, have friends, send messages, add posts and etc
 
 ## Used technologies
