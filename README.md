@@ -8,7 +8,8 @@
 * **PostgreSQL**(main DBMS for this project)
 * Maven(package manager to manipulate with dependecies)
 * JWT Token(JSON Web Token for authorization and authentication)
-* Docker(for run appllication in container)
+* Docker(for running appllication in container)
+* Swagger(documentation creating)
 
 ## Steps to Setup
 
